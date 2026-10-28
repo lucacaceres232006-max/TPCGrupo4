@@ -1,8 +1,11 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Dominio;
+using Negocio;
 
 namespace Presentacion1.Controllers
 {
@@ -10,7 +13,10 @@ namespace Presentacion1.Controllers
     {
         public ActionResult Index()
         {
-            return View();
+            LibroNegocio negocio = new LibroNegocio();
+            List<Libro> lista = negocio.listar();
+
+            return View(lista);
         }
 
         public ActionResult About()
