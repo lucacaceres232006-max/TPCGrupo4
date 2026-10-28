@@ -1,0 +1,86 @@
+﻿
+@{
+    ViewBag.Title = "Préstamos y devoluciones";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1>Préstamos y devoluciones</h1>
+        <p class="text-muted">
+            Consultá los préstamos registrados y sus fechas de vencimiento.
+        </p>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5">Buscar préstamo</h2>
+
+            <form method="get" action="@Url.Action("Index", "Prestamos")">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label for="buscar" class="form-label">Socio o DNI</label>
+                        <input type="text"
+                               id="buscar"
+                               name="buscar"
+                               class="form-control"
+                               placeholder="Nombre, apellido o DNI" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select id="estado" name="estado" class="form-select">
+                            <option value="">Todos los estados</option>
+                            <option value="Activo">Activo</option>
+                            <option value="Vencido">Vencido</option>
+                            <option value="Devuelto">Devuelto</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Listado de préstamos</h2>
+        <button type="button" class="btn btn-success" disabled>
+            + Registrar préstamo
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>N.º préstamo</th>
+                        <th>Socio</th>
+                        <th>Ejemplar</th>
+                        <th>Fecha de préstamo</th>
+                        <th>Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            Todavía no hay préstamos cargados en esta pantalla.
+                            <br />
+                            <small class="text-muted">
+                                El listado se conectará con la base de datos
+                                cuando esté disponible la lógica de préstamos.
+                            </small>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

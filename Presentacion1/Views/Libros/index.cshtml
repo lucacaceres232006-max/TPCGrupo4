@@ -1,0 +1,49 @@
+﻿
+@model List<Dominio.Libro>
+
+@{
+    ViewBag.Title = "Catálogo de libros";
+}
+
+<div class="container py-4">
+    <h1>Catálogo de libros</h1>
+    <p>Consultá los libros registrados en la biblioteca.</p>
+
+    <div class="row">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var libro in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="card-title">@libro.Titulo</h3>
+
+                            <p>
+                                <strong>Autor:</strong>
+                                @string.Join(", ", libro.Autores.Select(a => a.Nombre + " " + a.Apellido))
+                            </p>
+
+                            <p>
+                                <strong>Categoría:</strong>
+                                @string.Join(", ", libro.Categorias.Select(c => c.Descripcion))
+                            </p>
+
+                            <p>
+                                <strong>Editorial:</strong>
+                                @(libro.Editorial != null ? libro.Editorial.Nombre : "Sin editorial")
+                            </p>
+
+                            <p><strong>Año:</strong> @libro.AnioEdicion</p>
+                            <p><strong>ISBN:</strong> @libro.ISBN</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No hay libros registrados en el catálogo.</p>
+        }
+    </div>
+</div>

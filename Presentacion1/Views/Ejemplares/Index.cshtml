@@ -1,0 +1,72 @@
+﻿
+@model List<Dominio.Ejemplar>
+
+@{
+    ViewBag.Title = "Gestión de ejemplares";
+}
+
+<div class="container py-4">
+    <h1>Gestión de ejemplares</h1>
+    <p class="text-muted">
+        Consultá los ejemplares registrados en la biblioteca.
+    </p>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Buscar ejemplar</h5>
+
+            <form method="get" action="@Url.Action("Index", "Ejemplares")">
+                <div class="row">
+                    <div class="col-md-9 mb-2">
+                        <input type="text"
+                               name="buscar"
+                               class="form-control"
+                             placeholder="Buscar por código de inventario o título del libro"
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código de inventario</th>
+                        <th>Título del libro</th>
+                        <th>Estado</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var ejemplar in Model)
+                        {
+                            <tr>
+                                <td>@ejemplar.CodigoInventario</td>
+                                <td>@ejemplar.TituloLibro</td>
+                                <td>@ejemplar.Estado</td>
+                                <td>@ejemplar.Observaciones</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-4">
+                                No hay ejemplares registrados.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

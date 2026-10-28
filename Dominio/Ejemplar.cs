@@ -10,6 +10,7 @@ namespace Dominio
     {
         public int Id { get; set; }
         public int IdLibro { get; set; }
+        public string TituloLibro { get; set; }
         public string CodigoInventario { get; set; }
         public string Estado { get; set; } // Ej: Disponible, Prestado, Reservado, En reparación, Extraviado
         public string Observaciones { get; set; }
