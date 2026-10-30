@@ -1,0 +1,87 @@
+﻿@model Dominio.Autor
+
+@{
+    ViewBag.Title = "Editar Autor";
+}
+
+<main class="container mt-4" aria-labelledby="titulo-editar">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h1 id="titulo-editar" class="h4 mb-0">Editar Autor: @Model.Apellido, @Model.Nombre</h1>
+                </div>
+                <div class="card-body">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger" role="alert" aria-live="assertive">
+                            <strong>Error:</strong> @ViewBag.Error
+                        </div>
+                    }
+
+                    <p class="text-muted" id="instrucciones-edit">
+                        Los campos marcados con <span aria-hidden="true" class="text-danger">*</span><span class="visually-hidden">asterisco</span> son obligatorios.
+                    </p>
+
+                    <form action="@Url.Action("Edit", "Autor")" method="post" aria-describedby="instrucciones-edit">
+
+                        <input type="hidden" name="Id" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label for="txtNombre" class="form-label fw-semibold">
+                                Nombre <span class="text-danger" aria-hidden="true">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtNombre"
+                                   name="Nombre"
+                                   value="@Model.Nombre"
+                                   required
+                                   aria-required="true"
+                                   autocomplete="given-name" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txtApellido" class="form-label fw-semibold">
+                                Apellido <span class="text-danger" aria-hidden="true">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtApellido"
+                                   name="Apellido"
+                                   value="@Model.Apellido"
+                                   required
+                                   aria-required="true"
+                                   autocomplete="family-name" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txtBiografia" class="form-label fw-semibold">
+                                Datos Biográficos (Opcional)
+                            </label>
+                            <textarea class="form-control"
+                                      id="txtBiografia"
+                                      name="Biografia"
+                                      rows="4"
+                                      aria-describedby="ayuda-biografia">@Model.Biografia</textarea>
+                            <div id="ayuda-biografia" class="form-text">
+                                Modifique la reseña biográfica si corresponde.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="@Url.Action("Index", "Autor")" class="btn btn-secondary">
+                                Cancelar y volver al listado
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

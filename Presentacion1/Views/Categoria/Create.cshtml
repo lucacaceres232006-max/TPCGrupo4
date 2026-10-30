@@ -1,0 +1,60 @@
+﻿@model Dominio.Categoria
+
+@{
+    ViewBag.Title = "Nuevo Género";
+}
+
+<main class="container mt-4" aria-labelledby="titulo-alta">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h1 id="titulo-alta" class="h4 mb-0">Registrar Nuevo Género</h1>
+                </div>
+                <div class="card-body">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger" role="alert" aria-live="assertive">
+                            <strong>Error:</strong> @ViewBag.Error
+                        </div>
+                    }
+
+                    <p class="text-muted" id="instrucciones-form">
+                        Los campos marcados con <span aria-hidden="true" class="text-danger">*</span><span class="visually-hidden">asterisco</span> son obligatorios.
+                    </p>
+
+                    <form action="@Url.Action("Create", "Categoria")" method="post" aria-describedby="instrucciones-form">
+
+                        <div class="mb-3">
+                            <label for="txtDescripcion" class="form-label fw-semibold">
+                                Nombre del Género <span class="text-danger" aria-hidden="true">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtDescripcion"
+                                   name="Descripcion"
+                                   value="@(Model != null ? Model.Descripcion : "")"
+                                   required
+                                   aria-required="true"
+                                   aria-describedby="ayuda-genero" />
+                            <div id="ayuda-genero" class="form-text">
+                                Ejemplo: Ficción, Historia, Informática, Ensayo o Novela Policial.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="@Url.Action("Index", "Categoria")" class="btn btn-secondary">
+                                Cancelar y volver al listado
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Guardar Género
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

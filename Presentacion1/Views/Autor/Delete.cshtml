@@ -1,0 +1,55 @@
+﻿@model Dominio.Autor
+
+@{
+    ViewBag.Title = "Eliminar Autor";
+}
+
+<main class="container mt-4" aria-labelledby="titulo-eliminar">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h1 id="titulo-eliminar" class="h4 mb-0">Confirmar Eliminación de Autor</h1>
+                </div>
+                <div class="card-body">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger" role="alert" aria-live="assertive">
+                            <strong>No se pudo completar la operación:</strong> @ViewBag.Error
+                        </div>
+                    }
+
+                    <p class="lead">
+                        ¿Está seguro de que desea eliminar de forma permanente al siguiente autor?
+                    </p>
+
+                    <dl class="row bg-light p-3 rounded border">
+                        <dt class="col-sm-4">ID de Registro:</dt>
+                        <dd class="col-sm-8">@Model.Id</dd>
+
+                        <dt class="col-sm-4">Apellido y Nombre:</dt>
+                        <dd class="col-sm-8 fw-bold">@Model.Apellido, @Model.Nombre</dd>
+
+                        <dt class="col-sm-4">Biografía:</dt>
+                        <dd class="col-sm-8">
+                            @(string.IsNullOrWhiteSpace(Model.Biografia) ? "Sin datos biográficos" : Model.Biografia)
+                        </dd>
+                    </dl>
+
+                    <form action="@Url.Action("Delete", "Autor", new { id = Model.Id })" method="post" class="mt-4">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Index", "Autor")" class="btn btn-secondary">
+                                Cancelar y volver al listado
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                Confirmar Eliminación
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
