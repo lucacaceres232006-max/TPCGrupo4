@@ -8,7 +8,7 @@ namespace Presentacion1.Controllers
 {
     public class LibrosController : Controller
     {
-
+        // GET: Libros
         public ActionResult Index(string buscar)
         {
             LibroNegocio negocio = new LibroNegocio();
@@ -25,51 +25,56 @@ namespace Presentacion1.Controllers
             return View(lista);
         }
 
-
+        // GET: Libros/Create
         public ActionResult Create()
         {
-            EditorialNegocio editorialNegocio = new EditorialNegocio();
-            AutorNegocio autorNegocio = new AutorNegocio();
-            CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
-
-            ViewBag.Editoriales = editorialNegocio.listar();
-            ViewBag.Autores = autorNegocio.listar();
-            ViewBag.Categorias = categoriaNegocio.listar();
-
-            return View();
+            cargarListasDesplegables();
+            return View(new Libro());
         }
+
+        // POST: Libros/Create
         [HttpPost]
         public ActionResult Create(
-    string Titulo,
-    string ISBN,
-    int IdEditorial,
-    int AnioEdicion,
-    int[] IdsAutores,
-    int[] IdsCategorias)
+            string Titulo,
+            string ISBN,
+            int? IdEditorial,
+            int? AnioEdicion,
+            int[] IdsAutores,
+            int[] IdsCategorias)
         {
+            Libro libro = new Libro
+            {
+                Titulo = Titulo,
+                ISBN = ISBN,
+                AnioEdicion = AnioEdicion ?? 0,
+                Editorial = new Editorial { Id = IdEditorial ?? 0 }
+            };
+
             try
             {
-                Libro libro = new Libro();
-
-                libro.Titulo = Titulo;
-                libro.ISBN = ISBN;
-                libro.AnioEdicion = AnioEdicion;
-
-                libro.Editorial = new Editorial();
-                libro.Editorial.Id = IdEditorial;
-
-                AutorNegocio autorNegocio = new AutorNegocio();
-                CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
-
-                foreach (int id in IdsAutores)
+                if (IdsAutores != null)
                 {
-                    libro.Autores.Add(autorNegocio.obtenerPorId(id));
+                    foreach (int id in IdsAutores)
+                        libro.Autores.Add(new Autor { Id = id });
                 }
 
-                foreach (int id in IdsCategorias)
+                if (IdsCategorias != null)
                 {
-                    libro.Categorias.Add(categoriaNegocio.obtenerPorId(id));
+                    foreach (int id in IdsCategorias)
+                        libro.Categorias.Add(new Categoria { Id = id });
                 }
+
+                if (string.IsNullOrWhiteSpace(Titulo) || string.IsNullOrWhiteSpace(ISBN))
+                    throw new Exception("El título y el ISBN son obligatorios.");
+
+                if (IdEditorial == null || IdEditorial <= 0)
+                    throw new Exception("Debés seleccionar una editorial.");
+
+                if (libro.Autores.Count == 0)
+                    throw new Exception("Debés seleccionar al menos un autor.");
+
+                if (libro.Categorias.Count == 0)
+                    throw new Exception("Debés seleccionar al menos un género.");
 
                 LibroNegocio negocio = new LibroNegocio();
                 negocio.agregar(libro);
@@ -79,18 +84,12 @@ namespace Presentacion1.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = ex.Message;
-
-                EditorialNegocio editorialNegocio = new EditorialNegocio();
-                AutorNegocio autorNegocio = new AutorNegocio();
-                CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
-
-                ViewBag.Editoriales = editorialNegocio.listar();
-                ViewBag.Autores = autorNegocio.listar();
-                ViewBag.Categorias = categoriaNegocio.listar();
-
-                return View();
+                cargarListasDesplegables();
+                return View(libro);
             }
         }
+
+        // GET: Libros/Edit/5
         public ActionResult Edit(int id)
         {
             LibroNegocio negocio = new LibroNegocio();
@@ -101,50 +100,55 @@ namespace Presentacion1.Controllers
             if (libro == null)
                 return HttpNotFound();
 
-            EditorialNegocio editorialNegocio = new EditorialNegocio();
-            AutorNegocio autorNegocio = new AutorNegocio();
-            CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
-
-            ViewBag.Editoriales = editorialNegocio.listar();
-            ViewBag.Autores = autorNegocio.listar();
-            ViewBag.Categorias = categoriaNegocio.listar();
-
+            cargarListasDesplegables();
             return View(libro);
         }
+
+        // POST: Libros/Edit/5
         [HttpPost]
         public ActionResult Edit(
-    int Id,
-    string Titulo,
-    string ISBN,
-    int IdEditorial,
-    int AnioEdicion,
-    int[] IdsAutores,
-    int[] IdsCategorias)
+            int Id,
+            string Titulo,
+            string ISBN,
+            int? IdEditorial,
+            int? AnioEdicion,
+            int[] IdsAutores,
+            int[] IdsCategorias)
         {
+            Libro libro = new Libro
+            {
+                Id = Id,
+                Titulo = Titulo,
+                ISBN = ISBN,
+                AnioEdicion = AnioEdicion ?? 0,
+                Editorial = new Editorial { Id = IdEditorial ?? 0 }
+            };
+
             try
             {
-                Libro libro = new Libro();
-
-                libro.Id = Id;
-                libro.Titulo = Titulo;
-                libro.ISBN = ISBN;
-                libro.AnioEdicion = AnioEdicion;
-
-                libro.Editorial = new Editorial();
-                libro.Editorial.Id = IdEditorial;
-
-                AutorNegocio autorNegocio = new AutorNegocio();
-                CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
-
-                foreach (int id in IdsAutores)
+                if (IdsAutores != null)
                 {
-                    libro.Autores.Add(autorNegocio.obtenerPorId(id));
+                    foreach (int id in IdsAutores)
+                        libro.Autores.Add(new Autor { Id = id });
                 }
 
-                foreach (int id in IdsCategorias)
+                if (IdsCategorias != null)
                 {
-                    libro.Categorias.Add(categoriaNegocio.obtenerPorId(id));
+                    foreach (int id in IdsCategorias)
+                        libro.Categorias.Add(new Categoria { Id = id });
                 }
+
+                if (string.IsNullOrWhiteSpace(Titulo) || string.IsNullOrWhiteSpace(ISBN))
+                    throw new Exception("El título y el ISBN son obligatorios.");
+
+                if (IdEditorial == null || IdEditorial <= 0)
+                    throw new Exception("Debés seleccionar una editorial.");
+
+                if (libro.Autores.Count == 0)
+                    throw new Exception("Debés seleccionar al menos un autor.");
+
+                if (libro.Categorias.Count == 0)
+                    throw new Exception("Debés seleccionar al menos un género.");
 
                 LibroNegocio negocio = new LibroNegocio();
                 negocio.modificar(libro);
@@ -154,29 +158,12 @@ namespace Presentacion1.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = ex.Message;
-
-                EditorialNegocio editorialNegocio = new EditorialNegocio();
-                AutorNegocio autorNegocio = new AutorNegocio();
-                CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
-
-                ViewBag.Editoriales = editorialNegocio.listar();
-                ViewBag.Autores = autorNegocio.listar();
-                ViewBag.Categorias = categoriaNegocio.listar();
-
-           
-                Libro libro = new Libro
-                {
-                    Id = Id,
-                    Titulo = Titulo,
-                    ISBN = ISBN,
-                    AnioEdicion = AnioEdicion,
-                    Editorial = new Editorial { Id = IdEditorial }
-                };
-
+                cargarListasDesplegables();
                 return View(libro);
             }
         }
 
+        // GET: Libros/Delete/5
         public ActionResult Delete(int id)
         {
             try
@@ -193,10 +180,10 @@ namespace Presentacion1.Controllers
             }
         }
 
+        // GET: Libros/Details/5
         public ActionResult Details(int id)
         {
             LibroNegocio negocio = new LibroNegocio();
-
             List<Libro> lista = negocio.listar();
 
             Libro libro = lista.Find(x => x.Id == id);
@@ -207,6 +194,15 @@ namespace Presentacion1.Controllers
             return View(libro);
         }
 
+        private void cargarListasDesplegables()
+        {
+            EditorialNegocio editorialNegocio = new EditorialNegocio();
+            AutorNegocio autorNegocio = new AutorNegocio();
+            CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
 
+            ViewBag.Editoriales = editorialNegocio.listar();
+            ViewBag.Autores = autorNegocio.listar();
+            ViewBag.Categorias = categoriaNegocio.listar();
+        }
     }
 }

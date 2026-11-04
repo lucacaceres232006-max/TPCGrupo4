@@ -161,7 +161,6 @@ namespace Negocio
                 SET @idLibro = CAST(SCOPE_IDENTITY() AS INT);
         ";
 
-                // Relacionar autores
                 for (int i = 0; i < libro.Autores.Count; i++)
                 {
                     consulta += $@"
@@ -170,7 +169,6 @@ namespace Negocio
             ";
                 }
 
-                // Relacionar categorías
                 for (int i = 0; i < libro.Categorias.Count; i++)
                 {
                     consulta += $@"
@@ -179,7 +177,6 @@ namespace Negocio
             ";
                 }
 
-                // Registrar ejemplares
                 for (int i = 0; i < libro.Ejemplares.Count; i++)
                 {
                     consulta += $@"
@@ -210,19 +207,16 @@ namespace Negocio
                 datos.setearParametro("@idEditorial", libro.Editorial.Id);
                 datos.setearParametro("@anioEdicion", libro.AnioEdicion);
 
-                // Parámetros de autores
                 for (int i = 0; i < libro.Autores.Count; i++)
                 {
                     datos.setearParametro("@idAutor" + i, libro.Autores[i].Id);
                 }
 
-                // Parámetros de categorías
                 for (int i = 0; i < libro.Categorias.Count; i++)
                 {
                     datos.setearParametro("@idCategoria" + i, libro.Categorias[i].Id);
                 }
 
-                // Parámetros de ejemplares
                 for (int i = 0; i < libro.Ejemplares.Count; i++)
                 {
                     Ejemplar ejemplar = libro.Ejemplares[i];
@@ -273,7 +267,6 @@ namespace Negocio
                 WHERE IdLibro = @idLibro;
         ";
 
-                // Insertar nuevamente los autores
                 for (int i = 0; i < libro.Autores.Count; i++)
                 {
                     consulta += $@"
@@ -282,7 +275,6 @@ namespace Negocio
             ";
                 }
 
-                // Insertar nuevamente las categorías
                 for (int i = 0; i < libro.Categorias.Count; i++)
                 {
                     consulta += $@"

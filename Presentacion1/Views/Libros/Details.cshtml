@@ -1,36 +1,34 @@
-﻿
-@model Dominio.Libro
+﻿@model Dominio.Libro
 
 @{
     ViewBag.Title = "Detalle del libro";
 }
 
-<div class="container py-4">
-
-    <h2>Detalle del libro</h2>
+<main class="container py-4" aria-labelledby="titulo-detalle">
+    <h1 id="titulo-detalle" class="h2">Detalle del libro</h1>
     <hr />
 
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body">
 
-            <h3>@Model.Titulo</h3>
+            <h2 class="h3">@Model.Titulo</h2>
 
-            <p>
+            <p class="mb-1">
                 <strong>ISBN:</strong> @Model.ISBN
             </p>
 
-            <p>
+            <p class="mb-1">
                 <strong>Editorial:</strong>
                 @(Model.Editorial != null ? Model.Editorial.Nombre : "Sin editorial")
             </p>
 
-            <p>
+            <p class="mb-3">
                 <strong>Año de edición:</strong> @Model.AnioEdicion
             </p>
 
             <hr />
 
-            <h4>Autores</h4>
+            <h3 class="h4">Autores</h3>
 
             @if (Model.Autores != null && Model.Autores.Count > 0)
             {
@@ -48,7 +46,7 @@
 
             <hr />
 
-            <h4>Categorías</h4>
+            <h3 class="h4">Géneros</h3>
 
             @if (Model.Categorias != null && Model.Categorias.Count > 0)
             {
@@ -61,48 +59,57 @@
             }
             else
             {
-                <p>No hay categorías registradas.</p>
+                <p>No hay géneros registrados.</p>
             }
 
             <hr />
 
-            <h4>Ejemplares</h4>
+            <h3 class="h4">Ejemplares físicos</h3>
 
             @if (Model.Ejemplares != null && Model.Ejemplares.Count > 0)
             {
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Código de inventario</th>
-                            <th>Estado</th>
-                            <th>Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var ejemplar in Model.Ejemplares)
-                        {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle border">
+                        <caption class="visually-hidden">Listado de ejemplares físicos asociados al libro @Model.Titulo</caption>
+                        <thead class="table-dark">
                             <tr>
-                                <td>@ejemplar.CodigoInventario</td>
-                                <td>@ejemplar.Estado</td>
-                                <td>@ejemplar.Observaciones</td>
+                                <th scope="col">Código de inventario</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Observaciones</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var ejemplar in Model.Ejemplares)
+                            {
+                                <tr>
+                                    <th scope="row" class="fw-semibold">@ejemplar.CodigoInventario</th>
+                                    <td>@ejemplar.Estado</td>
+                                    <td>@(string.IsNullOrWhiteSpace(ejemplar.Observaciones) ? "Sin observaciones" : ejemplar.Observaciones)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
             else
             {
-                <p>No hay ejemplares registrados.</p>
+                <p>No hay ejemplares registrados para este libro.</p>
             }
 
             <hr />
 
-            <a href="@Url.Action("Index", "Libros")"
-               class="btn btn-secondary">
-                Volver al catálogo
-            </a>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Edit", "Libros", new { id = Model.Id })"
+                   class="btn btn-warning"
+                   aria-label="Modificar libro @Model.Titulo">
+                    Modificar libro
+                </a>
+                <a href="@Url.Action("Index", "Libros")"
+                   class="btn btn-secondary">
+                    Volver al catálogo
+                </a>
+            </div>
 
         </div>
     </div>
-
-</div>
+</main>

@@ -1,0 +1,95 @@
+﻿@model Dominio.Ejemplar
+
+@{
+    ViewBag.Title = "Modificar ejemplar";
+}
+
+<main class="container py-4" aria-labelledby="titulo-modificar-ejemplar">
+    <h1 id="titulo-modificar-ejemplar" class="h2">Modificar ejemplar: @Model.CodigoInventario</h1>
+    <p id="instrucciones-edit-ejemplar">
+        Actualizá la disponibilidad o las observaciones sobre el estado físico del ejemplar.
+    </p>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert" aria-live="assertive">
+            <strong>Error al modificar el ejemplar:</strong> @ViewBag.Error
+        </div>
+    }
+
+    @using (Html.BeginForm("Edit", "Ejemplares", FormMethod.Post, new { aria_describedby = "instrucciones-edit-ejemplar" }))
+    {
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="form-group mb-3">
+            <label for="ddlLibro" class="form-label fw-semibold">
+                Libro del catálogo <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <select id="ddlLibro" name="IdLibro" class="form-control form-select" required aria-required="true">
+                @if (ViewBag.Libros != null)
+                {
+                    foreach (var libro in ViewBag.Libros)
+                    {
+                        <option value="@libro.Id" @(Model.IdLibro == libro.Id ? "selected" : "")>
+                            @libro.Titulo (ISBN: @libro.ISBN)
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtCodigo" class="form-label fw-semibold">
+                Código único de inventario <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="text"
+                   id="txtCodigo"
+                   name="CodigoInventario"
+                   class="form-control"
+                   value="@Model.CodigoInventario"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ddlEstado" class="form-label fw-semibold">
+                Situación / Estado <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            @if (Model.Estado == "Prestado")
+            {
+                <input type="hidden" name="Estado" value="Prestado" />
+                <input type="text" id="ddlEstado" class="form-control" value="Prestado (En circulación)" readonly aria-describedby="ayuda-prestado" />
+                <small id="ayuda-prestado" class="form-text text-muted">
+                    El estado no se puede cambiar manualmente mientras el ejemplar tenga un préstamo activo.
+                </small>
+            }
+            else
+            {
+                <select id="ddlEstado" name="Estado" class="form-control form-select" required aria-required="true">
+                    <option value="Disponible" @(Model.Estado == "Disponible" ? "selected" : "")>Disponible</option>
+                    <option value="Reservado" @(Model.Estado == "Reservado" ? "selected" : "")>Reservado</option>
+                    <option value="En reparación" @(Model.Estado == "En reparación" ? "selected" : "")>En reparación</option>
+                    <option value="Extraviado" @(Model.Estado == "Extraviado" ? "selected" : "")>Extraviado</option>
+                </select>
+            }
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtObservaciones" class="form-label fw-semibold">
+                Observaciones sobre el estado físico
+            </label>
+            <textarea id="txtObservaciones"
+                      name="Observaciones"
+                      class="form-control"
+                      rows="3">@Model.Observaciones</textarea>
+        </div>
+
+        <hr />
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <a href="@Url.Action("Index", "Ejemplares")" class="btn btn-secondary">Cancelar y volver al listado</a>
+        </div>
+    }
+</main>

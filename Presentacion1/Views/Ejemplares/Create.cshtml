@@ -1,0 +1,89 @@
+﻿@model Dominio.Ejemplar
+
+@{
+    ViewBag.Title = "Registrar ejemplar";
+}
+
+<main class="container py-4" aria-labelledby="titulo-alta-ejemplar">
+    <h1 id="titulo-alta-ejemplar" class="h2">Registrar nuevo ejemplar físico</h1>
+    <p id="instrucciones-ejemplar">
+        Asociá una copia física a un libro del catálogo. Los campos con <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.
+    </p>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert" aria-live="assertive">
+            <strong>Error al registrar el ejemplar:</strong> @ViewBag.Error
+        </div>
+    }
+
+    @using (Html.BeginForm("Create", "Ejemplares", FormMethod.Post, new { aria_describedby = "instrucciones-ejemplar" }))
+    {
+        <div class="form-group mb-3">
+            <label for="ddlLibro" class="form-label fw-semibold">
+                Libro del catálogo <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <select id="ddlLibro" name="IdLibro" class="form-control form-select" required aria-required="true">
+                <option value="">Seleccionar libro</option>
+                @if (ViewBag.Libros != null)
+                {
+                    foreach (var libro in ViewBag.Libros)
+                    {
+                        <option value="@libro.Id" @(Model != null && Model.IdLibro == libro.Id ? "selected" : "")>
+                            @libro.Titulo (ISBN: @libro.ISBN)
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtCodigo" class="form-label fw-semibold">
+                Código único de inventario (Opcional)
+            </label>
+            <input type="text"
+                   id="txtCodigo"
+                   name="CodigoInventario"
+                   class="form-control"
+                   placeholder="Dejar en blanco para generar automáticamente"
+                   value="@(Model != null ? Model.CodigoInventario : "")"
+                   aria-describedby="ayuda-codigo" />
+            <small id="ayuda-codigo" class="form-text text-muted">
+                Si el libro ya posee una etiqueta física de inventario, ingresala acá. Si lo dejás vacío, el sistema generará un código único automáticamente.
+            </small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ddlEstado" class="form-label fw-semibold">
+                Estado inicial <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <select id="ddlEstado" name="Estado" class="form-control form-select" required aria-required="true">
+                <option value="Disponible" @(Model == null || Model.Estado == "Disponible" ? "selected" : "")>Disponible</option>
+                <option value="Reservado" @(Model != null && Model.Estado == "Reservado" ? "selected" : "")>Reservado</option>
+                <option value="En reparación" @(Model != null && Model.Estado == "En reparación" ? "selected" : "")>En reparación</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtObservaciones" class="form-label fw-semibold">
+                Observaciones sobre el estado físico (Opcional)
+            </label>
+            <textarea id="txtObservaciones"
+                      name="Observaciones"
+                      class="form-control"
+                      rows="3"
+                      aria-describedby="ayuda-obs">@(Model != null ? Model.Observaciones : "")</textarea>
+            <small id="ayuda-obs" class="form-text text-muted">
+                Podés detallar el estado de conservación de las tapas, encuadernación o páginas.
+            </small>
+        </div>
+
+        <hr />
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Registrar ejemplar</button>
+            <a href="@Url.Action("Index", "Ejemplares")" class="btn btn-secondary">Cancelar y volver al listado</a>
+        </div>
+    }
+</main>

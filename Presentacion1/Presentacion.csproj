@@ -185,6 +185,8 @@
     <Content Include="Views\Libros\Create.cshtml" />
     <Content Include="Views\Libros\Edit.cshtml" />
     <Content Include="Views\Libros\Details.cshtml" />
+    <Content Include="Views\Ejemplares\Create.cshtml" />
+    <Content Include="Views\Ejemplares\Edit.cshtml" />
     <None Include="Views\_ViewStart.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
