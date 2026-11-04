@@ -1,0 +1,46 @@
+﻿
+@model Dominio.Editorial
+
+@{
+    ViewBag.Title = "Eliminar editorial";
+}
+
+<div class="container mt-4">
+
+    <h2>Eliminar editorial</h2>
+
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+
+    <div class="alert alert-warning">
+        ¿Estás seguro de que querés eliminar esta editorial?
+    </div>
+
+    <div class="mb-3">
+        <strong>ID:</strong> @Model.Id
+    </div>
+
+    <div class="mb-4">
+        <strong>Nombre:</strong> @Model.Nombre
+    </div>
+
+    @using (Html.BeginForm("Delete", "Editorial", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Id)
+
+        <button type="submit" class="btn btn-danger">
+            Confirmar eliminación
+        </button>
+
+        <a href="@Url.Action("Index", "Editorial")" class="btn btn-secondary">
+            Cancelar
+        </a>
+    }
+
+</div>

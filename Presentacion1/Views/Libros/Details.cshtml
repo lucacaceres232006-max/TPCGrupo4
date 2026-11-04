@@ -1,0 +1,108 @@
+﻿
+@model Dominio.Libro
+
+@{
+    ViewBag.Title = "Detalle del libro";
+}
+
+<div class="container py-4">
+
+    <h2>Detalle del libro</h2>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+
+            <h3>@Model.Titulo</h3>
+
+            <p>
+                <strong>ISBN:</strong> @Model.ISBN
+            </p>
+
+            <p>
+                <strong>Editorial:</strong>
+                @(Model.Editorial != null ? Model.Editorial.Nombre : "Sin editorial")
+            </p>
+
+            <p>
+                <strong>Año de edición:</strong> @Model.AnioEdicion
+            </p>
+
+            <hr />
+
+            <h4>Autores</h4>
+
+            @if (Model.Autores != null && Model.Autores.Count > 0)
+            {
+                <ul>
+                    @foreach (var autor in Model.Autores)
+                    {
+                        <li>@autor.Nombre @autor.Apellido</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No hay autores registrados.</p>
+            }
+
+            <hr />
+
+            <h4>Categorías</h4>
+
+            @if (Model.Categorias != null && Model.Categorias.Count > 0)
+            {
+                <ul>
+                    @foreach (var categoria in Model.Categorias)
+                    {
+                        <li>@categoria.Descripcion</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No hay categorías registradas.</p>
+            }
+
+            <hr />
+
+            <h4>Ejemplares</h4>
+
+            @if (Model.Ejemplares != null && Model.Ejemplares.Count > 0)
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Código de inventario</th>
+                            <th>Estado</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ejemplar in Model.Ejemplares)
+                        {
+                            <tr>
+                                <td>@ejemplar.CodigoInventario</td>
+                                <td>@ejemplar.Estado</td>
+                                <td>@ejemplar.Observaciones</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No hay ejemplares registrados.</p>
+            }
+
+            <hr />
+
+            <a href="@Url.Action("Index", "Libros")"
+               class="btn btn-secondary">
+                Volver al catálogo
+            </a>
+
+        </div>
+    </div>
+
+</div>

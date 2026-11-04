@@ -1,0 +1,101 @@
+﻿
+@model Dominio.Libro
+@using System.Linq
+
+@{
+    ViewBag.Title = "Modificar libro";
+}
+
+<div class="container py-4">
+    <h2>Modificar libro</h2>
+    <p>Actualizá los datos del libro seleccionado.</p>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+
+    @using (Html.BeginForm("Edit", "Libros", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="form-group mb-3">
+            <label>Título</label>
+            <input type="text" name="Titulo" class="form-control"
+                   value="@Model.Titulo" required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>ISBN</label>
+            <input type="text" name="ISBN" class="form-control"
+                   value="@Model.ISBN" required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Editorial</label>
+            <select name="IdEditorial" class="form-control" required>
+                @foreach (var editorial in ViewBag.Editoriales)
+                {
+                    if (Model.Editorial != null && Model.Editorial.Id == editorial.Id)
+                    {
+                        <option value="@editorial.Id" selected>@editorial.Nombre</option>
+                    }
+                    else
+                    {
+                        <option value="@editorial.Id">@editorial.Nombre</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Año de edición</label>
+            <input type="number" name="AnioEdicion" class="form-control"
+                   value="@Model.AnioEdicion" required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Autores</label>
+            <select name="IdsAutores" class="form-control" multiple required>
+                @foreach (var autor in ViewBag.Autores)
+                {
+                    if (Model.Autores.Any(a => a.Id == autor.Id))
+                    {
+                        <option value="@autor.Id" selected>@autor.Nombre @autor.Apellido</option>
+                    }
+                    else
+                    {
+                        <option value="@autor.Id">@autor.Nombre @autor.Apellido</option>
+                    }
+                }
+            </select>
+            <small>Podés seleccionar varios autores manteniendo Ctrl.</small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Categorías</label>
+            <select name="IdsCategorias" class="form-control" multiple required>
+                @foreach (var categoria in ViewBag.Categorias)
+                {
+                    if (Model.Categorias.Any(c => c.Id == categoria.Id))
+                    {
+                        <option value="@categoria.Id" selected>@categoria.Descripcion</option>
+                    }
+                    else
+                    {
+                        <option value="@categoria.Id">@categoria.Descripcion</option>
+                    }
+                }
+            </select>
+            <small>Podés seleccionar varias categorías manteniendo Ctrl.</small>
+        </div>
+
+        <hr />
+
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <a href="@Url.Action("Index", "Libros")" class="btn btn-secondary">Cancelar</a>
+    }
+</div>

@@ -1,0 +1,42 @@
+﻿
+@model Dominio.Editorial
+
+@{
+    ViewBag.Title = "Nueva editorial";
+}
+
+<div class="container mt-4">
+
+    <h2>Nueva editorial</h2>
+
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+
+    @using (Html.BeginForm("Create", "Editorial", FormMethod.Post))
+    {
+        <div class="form-group mb-3">
+            <label>Nombre de la editorial</label>
+
+            @Html.TextBoxFor(m => m.Nombre, new
+            {
+                @class = "form-control",
+                placeholder = "Ingrese el nombre de la editorial"
+            })
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Guardar
+        </button>
+
+        <a href="@Url.Action("Index", "Editorial")" class="btn btn-secondary">
+            Cancelar
+        </a>
+    }
+
+</div>

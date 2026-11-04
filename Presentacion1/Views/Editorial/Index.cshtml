@@ -1,0 +1,60 @@
+﻿
+@model List<Dominio.Editorial>
+
+@{
+    ViewBag.Title = "Editoriales";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Editoriales</h2>
+
+        <a href="@Url.Action("Create", "Editorial")" class="btn btn-primary">
+            Nueva editorial
+        </a>
+    </div>
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var editorial in Model)
+                {
+                    <tr>
+                        <td>@editorial.Id</td>
+                        <td>@editorial.Nombre</td>
+                        <td>
+                            <a href="@Url.Action("Edit", "Editorial", new { id = editorial.Id })"
+                               class="btn btn-warning btn-sm">
+                                Editar
+                            </a>
+
+                            <a href="@Url.Action("Delete", "Editorial", new { id = editorial.Id })"
+                               class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">
+                        No hay editoriales registradas.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

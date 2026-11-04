@@ -1,0 +1,76 @@
+﻿@{
+    ViewBag.Title = "Registrar libro";
+}
+
+<div class="container py-4">
+
+    <h2>Registrar nuevo libro</h2>
+    <p>Completá los datos para agregar un libro al catálogo.</p>
+
+    <hr />
+
+    @using (Html.BeginForm("Create", "Libros", FormMethod.Post))
+    {
+        <div class="form-group mb-3">
+            <label>Título</label>
+            <input type="text" name="Titulo" class="form-control" required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>ISBN</label>
+            <input type="text" name="ISBN" class="form-control" required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Editorial</label>
+            <select name="IdEditorial" class="form-control" required>
+                <option value="">Seleccionar editorial</option>
+
+                @foreach (var editorial in ViewBag.Editoriales)
+                {
+                    <option value="@editorial.Id">@editorial.Nombre</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Año de edición</label>
+            <input type="number" name="AnioEdicion" class="form-control" required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Autores</label>
+            <select name="IdsAutores" class="form-control" multiple required>
+                @foreach (var autor in ViewBag.Autores)
+                {
+                    <option value="@autor.Id">
+                        @autor.Nombre @autor.Apellido
+                    </option>
+                }
+            </select>
+            <small class="text-muted">Podés seleccionar varios autores manteniendo presionada la tecla Ctrl.</small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Categorías</label>
+            <select name="IdsCategorias" class="form-control" multiple required>
+                @foreach (var categoria in ViewBag.Categorias)
+                {
+                    <option value="@categoria.Id">@categoria.Descripcion</option>
+                }
+            </select>
+            <small class="text-muted">Podés seleccionar varias categorías manteniendo presionada la tecla Ctrl.</small>
+        </div>
+
+        <hr />
+
+        <button type="submit" class="btn btn-primary">
+            Registrar libro
+        </button>
+
+        <a href="@Url.Action("Index", "Libros")" class="btn btn-secondary">
+            Cancelar
+        </a>
+    }
+
+</div>
