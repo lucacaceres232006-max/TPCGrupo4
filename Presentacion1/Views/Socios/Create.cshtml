@@ -1,0 +1,139 @@
+﻿@model Dominio.Socio
+
+@{
+    ViewBag.Title = "Registrar socio";
+}
+
+<main class="container py-4" aria-labelledby="titulo-alta-socio">
+    <h1 id="titulo-alta-socio" class="h2">Registrar nuevo socio</h1>
+    <p id="instrucciones-socio">
+        Completá los datos personales y de contacto del socio. Los campos con <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.
+    </p>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert" aria-live="assertive">
+            <strong>Error al registrar el socio:</strong> @ViewBag.Error
+        </div>
+    }
+
+    @using (Html.BeginForm("Create", "Socios", FormMethod.Post, new { aria_describedby = "instrucciones-socio" }))
+    {
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="txtNombre" class="form-label fw-semibold">
+                    Nombre <span class="text-danger" aria-hidden="true">*</span>
+                </label>
+                <input type="text"
+                       id="txtNombre"
+                       name="Nombre"
+                       class="form-control"
+                       value="@(Model != null ? Model.Nombre : "")"
+                       required
+                       aria-required="true"
+                       autocomplete="given-name" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="txtApellido" class="form-label fw-semibold">
+                    Apellido <span class="text-danger" aria-hidden="true">*</span>
+                </label>
+                <input type="text"
+                       id="txtApellido"
+                       name="Apellido"
+                       class="form-control"
+                       value="@(Model != null ? Model.Apellido : "")"
+                       required
+                       aria-required="true"
+                       autocomplete="family-name" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="txtDni" class="form-label fw-semibold">
+                    DNI <span class="text-danger" aria-hidden="true">*</span>
+                </label>
+                <input type="text"
+                       id="txtDni"
+                       name="DNI"
+                       class="form-control"
+                       value="@(Model != null ? Model.DNI : "")"
+                       required
+                       aria-required="true" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="ddlPolitica" class="form-label fw-semibold">
+                    Política de préstamo / Categoría <span class="text-danger" aria-hidden="true">*</span>
+                </label>
+                <select id="ddlPolitica" name="idPolitica" class="form-control form-select" required aria-required="true">
+                    <option value="">Seleccionar política</option>
+                    @if (ViewBag.Politicas != null)
+                    {
+                        foreach (var politica in ViewBag.Politicas)
+                        {
+                            bool seleccionada = Model != null && Model.PoliticaPrestamo != null && Model.PoliticaPrestamo.Id == politica.Id;
+                            <option value="@politica.Id" @(seleccionada ? "selected" : "")>
+                                @politica.Descripcion (Máx. @politica.CantidadMaximaEjemplares libros, @politica.DiasDuracion días)
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="txtDireccion" class="form-label fw-semibold">Dirección</label>
+            <input type="text"
+                   id="txtDireccion"
+                   name="Direccion"
+                   class="form-control"
+                   value="@(Model != null ? Model.Direccion : "")"
+                   autocomplete="street-address" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="txtTelefono" class="form-label fw-semibold">Teléfono</label>
+                <input type="text"
+                       id="txtTelefono"
+                       name="Telefono"
+                       class="form-control"
+                       value="@(Model != null ? Model.Telefono : "")"
+                       autocomplete="tel" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="txtEmail" class="form-label fw-semibold">Correo electrónico</label>
+                <input type="email"
+                       id="txtEmail"
+                       name="Email"
+                       class="form-control"
+                       value="@(Model != null ? Model.Email : "")"
+                       autocomplete="email" />
+            </div>
+        </div>
+
+        <div class="form-check mb-4">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="chkHabilitado"
+                   name="Habilitado"
+                   value="true"
+                   @(Model == null || Model.Habilitado ? "checked" : "") />
+            <label class="form-check-label fw-semibold" for="chkHabilitado">
+                Socio habilitado para retirar préstamos
+            </label>
+            <input type="hidden" name="Habilitado" value="false" />
+        </div>
+
+        <hr />
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Registrar socio</button>
+            <a href="@Url.Action("Index", "Socios")" class="btn btn-secondary">Cancelar y volver al listado</a>
+        </div>
+    }
+</main>

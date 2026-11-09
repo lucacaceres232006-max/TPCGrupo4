@@ -1,0 +1,81 @@
+﻿@model Dominio.PoliticaPrestamo
+
+@{
+    ViewBag.Title = "Modificar política de préstamo";
+}
+
+<main class="container py-4" aria-labelledby="titulo-editar-politica">
+    <h1 id="titulo-editar-politica" class="h2">Modificar política: @Model.Descripcion</h1>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert" aria-live="assertive">
+            <strong>Error:</strong> @ViewBag.Error
+        </div>
+    }
+
+    @using (Html.BeginForm("Edit", "PoliticaPrestamo", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="form-group mb-3">
+            <label for="txtDescripcion" class="form-label fw-semibold">
+                Descripción / Categoría <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="text"
+                   id="txtDescripcion"
+                   name="Descripcion"
+                   class="form-control"
+                   value="@Model.Descripcion"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtDias" class="form-label fw-semibold">
+                Días de duración del préstamo <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="number"
+                   id="txtDias"
+                   name="DiasDuracion"
+                   class="form-control"
+                   value="@Model.DiasDuracion"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtCantidad" class="form-label fw-semibold">
+                Cantidad máxima de ejemplares simultáneos <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="number"
+                   id="txtCantidad"
+                   name="CantidadMaximaEjemplares"
+                   class="form-control"
+                   value="@Model.CantidadMaximaEjemplares"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtRenovaciones" class="form-label fw-semibold">
+                Límite de renovaciones consecutivas <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="number"
+                   id="txtRenovaciones"
+                   name="LimiteRenovaciones"
+                   class="form-control"
+                   value="@Model.LimiteRenovaciones"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <hr />
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <a href="@Url.Action("Index", "PoliticaPrestamo")" class="btn btn-secondary">Cancelar y volver al listado</a>
+        </div>
+    }
+</main>

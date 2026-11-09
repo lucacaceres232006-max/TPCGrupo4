@@ -1,0 +1,83 @@
+﻿@model Dominio.PoliticaPrestamo
+
+@{
+    ViewBag.Title = "Nueva política de préstamo";
+}
+
+<main class="container py-4" aria-labelledby="titulo-alta-politica">
+    <h1 id="titulo-alta-politica" class="h2">Registrar nueva política de préstamo</h1>
+    <p id="instrucciones-politica">
+        Definí los plazos y topes aplicables. Los campos con <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.
+    </p>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert" aria-live="assertive">
+            <strong>Error:</strong> @ViewBag.Error
+        </div>
+    }
+
+    @using (Html.BeginForm("Create", "PoliticaPrestamo", FormMethod.Post, new { aria_describedby = "instrucciones-politica" }))
+    {
+        <div class="form-group mb-3">
+            <label for="txtDescripcion" class="form-label fw-semibold">
+                Descripción / Categoría <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="text"
+                   id="txtDescripcion"
+                   name="Descripcion"
+                   class="form-control"
+                   placeholder="Ej: Estudiante Universitario, Docente, General..."
+                   value="@(Model != null ? Model.Descripcion : "")"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtDias" class="form-label fw-semibold">
+                Días de duración del préstamo <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="number"
+                   id="txtDias"
+                   name="DiasDuracion"
+                   class="form-control"
+                   value="@(Model != null && Model.DiasDuracion > 0 ? Model.DiasDuracion.ToString() : "7")"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtCantidad" class="form-label fw-semibold">
+                Cantidad máxima de ejemplares simultáneos <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="number"
+                   id="txtCantidad"
+                   name="CantidadMaximaEjemplares"
+                   class="form-control"
+                   value="@(Model != null && Model.CantidadMaximaEjemplares > 0 ? Model.CantidadMaximaEjemplares.ToString() : "2")"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="txtRenovaciones" class="form-label fw-semibold">
+                Límite de renovaciones consecutivas <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="number"
+                   id="txtRenovaciones"
+                   name="LimiteRenovaciones"
+                   class="form-control"
+                   value="@(Model != null ? Model.LimiteRenovaciones.ToString() : "1")"
+                   required
+                   aria-required="true" />
+        </div>
+
+        <hr />
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar política</button>
+            <a href="@Url.Action("Index", "PoliticaPrestamo")" class="btn btn-secondary">Cancelar y volver al listado</a>
+        </div>
+    }
+</main>

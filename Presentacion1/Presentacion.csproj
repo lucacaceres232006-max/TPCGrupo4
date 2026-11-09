@@ -123,6 +123,7 @@
     <Compile Include="Controllers\EjemplaresController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LibrosController.cs" />
+    <Compile Include="Controllers\PoliticaPrestamoController.cs" />
     <Compile Include="Controllers\PrestamosController.cs" />
     <Compile Include="Controllers\SociosController.cs" />
     <Compile Include="Global.asax.cs">
@@ -187,6 +188,11 @@
     <Content Include="Views\Libros\Details.cshtml" />
     <Content Include="Views\Ejemplares\Create.cshtml" />
     <Content Include="Views\Ejemplares\Edit.cshtml" />
+    <Content Include="Views\PoliticaPrestamo\Index.cshtml" />
+    <Content Include="Views\PoliticaPrestamo\Create.cshtml" />
+    <Content Include="Views\PoliticaPrestamo\Edit.cshtml" />
+    <Content Include="Views\Socios\Create.cshtml" />
+    <Content Include="Views\Socios\Edit.cshtml" />
     <None Include="Views\_ViewStart.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
