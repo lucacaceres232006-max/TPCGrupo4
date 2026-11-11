@@ -1,0 +1,52 @@
+﻿
+@model List<Dominio.Usuario>
+
+@{
+    ViewBag.Title = "Usuarios";
+}
+
+<h2>Gestión de Usuarios</h2>
+
+<p>
+    @Html.ActionLink("Agregar usuario", "Create", "Usuarios", null, new { @class = "btn btn-primary" })
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Email</th>
+            <th>Perfil</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var usuario in Model)
+        {
+            <tr>
+                <td>@usuario.NombreUsuario</td>
+                <td>@usuario.Nombre</td>
+                <td>@usuario.Apellido</td>
+                <td>@usuario.Email</td>
+                <td>@usuario.Perfil</td>
+                <td>@(usuario.Activo ? "Activo" : "Inactivo")</td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = usuario.Id }, new { @class = "btn btn-warning btn-sm" })
+
+                    @if (usuario.Activo)
+                    {
+                        @Html.ActionLink("Desactivar", "CambiarEstado", new { id = usuario.Id, activo = false }, new { @class = "btn btn-danger btn-sm" })
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Activar", "CambiarEstado", new { id = usuario.Id, activo = true }, new { @class = "btn btn-success btn-sm" })
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,56 @@
+﻿
+@model Dominio.Usuario
+
+@{
+    ViewBag.Title = "Agregar Usuario";
+}
+
+<h2>Agregar Usuario</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    <div class="form-group">
+        @Html.LabelFor(m => m.NombreUsuario, "Nombre de usuario")
+        @Html.TextBoxFor(m => m.NombreUsuario, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Clave, "Contraseña")
+        @Html.PasswordFor(m => m.Clave, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Nombre, "Nombre")
+        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Apellido, "Apellido")
+        @Html.TextBoxFor(m => m.Apellido, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, "Email")
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Perfil, "Perfil")
+        @Html.DropDownListFor(m => m.Perfil,
+                 new SelectList(new[] { "Administrador", "Bibliotecario" }),
+                 "Seleccione un perfil",
+                 new { @class = "form-control" })
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    @Html.ActionLink("Volver", "Index", null, new { @class = "btn btn-secondary" })
+}

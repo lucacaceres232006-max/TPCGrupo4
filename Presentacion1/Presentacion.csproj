@@ -126,6 +126,7 @@
     <Compile Include="Controllers\PoliticaPrestamoController.cs" />
     <Compile Include="Controllers\PrestamosController.cs" />
     <Compile Include="Controllers\SociosController.cs" />
+    <Compile Include="Controllers\UsuariosController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -193,6 +194,9 @@
     <Content Include="Views\PoliticaPrestamo\Edit.cshtml" />
     <Content Include="Views\Socios\Create.cshtml" />
     <Content Include="Views\Socios\Edit.cshtml" />
+    <Content Include="Views\Usuarios\Index.cshtml" />
+    <Content Include="Views\Usuarios\Create.cshtml" />
+    <Content Include="Views\Usuarios\Edit.cshtml" />
     <None Include="Views\_ViewStart.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
