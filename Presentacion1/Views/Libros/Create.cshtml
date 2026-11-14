@@ -5,6 +5,11 @@
     ViewBag.Title = "Registrar libro";
 }
 
+<script>
+    window.listaAutoresDisponibles = @Html.Raw(Json.Encode(ViewBag.Autores));
+    window.listaCategoriasDisponibles = @Html.Raw(Json.Encode(ViewBag.Categorias));
+</script>
+
 <main class="container py-4" aria-labelledby="titulo-registrar">
     <h1 id="titulo-registrar" class="h2">Registrar nuevo libro</h1>
     <p id="instrucciones-alta">
@@ -64,67 +69,33 @@
                    value="@(Model != null && Model.AnioEdicion > 0 ? Model.AnioEdicion.ToString() : "")" required aria-required="true" />
         </div>
 
-        <fieldset class="mb-3 p-3 border rounded" aria-describedby="ayuda-autores">
-            <legend class="fs-6 fw-semibold mb-2">
-                Autores <span class="text-danger" aria-hidden="true">*</span>
-            </legend>
-            <div id="ayuda-autores" class="form-text text-muted mb-2">
-                Marcá con barra espaciadora o clic uno o más autores para este libro.
-            </div>
-            <div class="row">
-                @if (ViewBag.Autores != null)
-                {
-                    foreach (var autor in ViewBag.Autores)
-                    {
-                        bool marcado = Model != null && Model.Autores != null && Model.Autores.Any(a => a.Id == autor.Id);
-                        <div class="col-md-6 mb-1">
-                            <div class="form-check">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="IdsAutores"
-                                       id="chkAutor_@autor.Id"
-                                       value="@autor.Id"
-                                       @(marcado ? "checked" : "") />
-                                <label class="form-check-label" for="chkAutor_@autor.Id">
-                                    @autor.Nombre @autor.Apellido
-                                </label>
-                            </div>
-                        </div>
-                    }
-                }
-            </div>
-        </fieldset>
+        <div class="mb-3 position-relative">
+            <label for="buscadorAutores" class="form-label fw-semibold">
+                Autor <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="text" id="buscadorAutores" class="form-control" placeholder="Escribí para buscar autor..." autocomplete="off" />
+            <div id="resultadosAutores" class="list-group position-absolute shadow-sm w-100" style="z-index: 1000; display: none;"></div>
 
-        <fieldset class="mb-3 p-3 border rounded" aria-describedby="ayuda-categorias">
-            <legend class="fs-6 fw-semibold mb-2">
-                Géneros <span class="text-danger" aria-hidden="true">*</span>
-            </legend>
-            <div id="ayuda-categorias" class="form-text text-muted mb-2">
-                Marcá con barra espaciadora o clic uno o más géneros literarios.
+            <div class="mt-1">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modalAutores">Ver lista completa de autores</a>
             </div>
-            <div class="row">
-                @if (ViewBag.Categorias != null)
-                {
-                    foreach (var categoria in ViewBag.Categorias)
-                    {
-                        bool marcado = Model != null && Model.Categorias != null && Model.Categorias.Any(c => c.Id == categoria.Id);
-                        <div class="col-md-6 mb-1">
-                            <div class="form-check">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="IdsCategorias"
-                                       id="chkCat_@categoria.Id"
-                                       value="@categoria.Id"
-                                       @(marcado ? "checked" : "") />
-                                <label class="form-check-label" for="chkCat_@categoria.Id">
-                                    @categoria.Descripcion
-                                </label>
-                            </div>
-                        </div>
-                    }
-                }
+
+            <div id="contenedorAutoresSeleccionados" class="mt-2"></div>
+        </div>
+
+        <div class="mb-3 position-relative">
+            <label for="buscadorCategorias" class="form-label fw-semibold">
+                Género <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+            <input type="text" id="buscadorCategorias" class="form-control" placeholder="Escribí para buscar género..." autocomplete="off" />
+            <div id="resultadosCategorias" class="list-group position-absolute shadow-sm w-100" style="z-index: 1000; display: none;"></div>
+
+            <div class="mt-1">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modalCategorias">Ver lista completa de géneros</a>
             </div>
-        </fieldset>
+
+            <div id="contenedorCategoriasSeleccionados" class="mt-2"></div>
+        </div>
 
         <hr />
 
@@ -139,3 +110,63 @@
         </div>
     }
 </main>
+
+<div class="modal fade" id="modalAutores" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Seleccionar Autores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @if (ViewBag.Autores != null)
+                {
+                    foreach (var autor in ViewBag.Autores)
+                    {
+                        bool marcado = Model != null && Model.Autores != null && Model.Autores.Any(a => a.Id == autor.Id);
+                        <div class="form-check mb-2">
+                            <input class="form-check-input chk-modal-autores" type="checkbox" value="@autor.Id" id="chk_modal_autores_@autor.Id" @(marcado ? "checked" : "") />
+                            <label class="form-check-label" for="chk_modal_autores_@autor.Id">
+                                @autor.Nombre @autor.Apellido
+                            </label>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCategorias" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Seleccionar Géneros</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @if (ViewBag.Categorias != null)
+                {
+                    foreach (var categoria in ViewBag.Categorias)
+                    {
+                        bool marcado = Model != null && Model.Categorias != null && Model.Categorias.Any(c => c.Id == categoria.Id);
+                        <div class="form-check mb-2">
+                            <input class="form-check-input chk-modal-categorias" type="checkbox" value="@categoria.Id" id="chk_modal_categorias_@categoria.Id" @(marcado ? "checked" : "") />
+                            <label class="form-check-label" for="chk_modal_categorias_@categoria.Id">
+                                @categoria.Descripcion
+                            </label>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/libros-buscador.js"></script>
