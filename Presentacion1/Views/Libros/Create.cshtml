@@ -13,7 +13,7 @@
 <main class="container py-4" aria-labelledby="titulo-registrar">
     <h1 id="titulo-registrar" class="h2">Registrar nuevo libro</h1>
     <p id="instrucciones-alta">
-        Completá los datos para agregar un libro al catálogo. Todos los campos marcados con <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.
+        Completá los datos para agregar un libro al catálogo. Todos los campos marcados con * son obligatorios.
     </p>
 
     <hr />
@@ -29,7 +29,7 @@
     {
         <div class="form-group mb-3">
             <label for="txtTitulo" class="form-label fw-semibold">
-                Título <span class="text-danger" aria-hidden="true">*</span>
+                Título *
             </label>
             <input type="text" id="txtTitulo" name="Titulo" class="form-control"
                    value="@(Model != null ? Model.Titulo : "")" required aria-required="true" />
@@ -37,15 +37,22 @@
 
         <div class="form-group mb-3">
             <label for="txtISBN" class="form-label fw-semibold">
-                ISBN <span class="text-danger" aria-hidden="true">*</span>
+                ISBN *
             </label>
             <input type="text" id="txtISBN" name="ISBN" class="form-control"
-                   value="@(Model != null ? Model.ISBN : "")" required aria-required="true" />
+                   value="@(Model != null ? Model.ISBN : "")" required aria-required="true"
+                   placeholder="Ej: 978-987-566-897-9 o 9789875668979"
+                   pattern="^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$\vert{}97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$"
+                   title="Ingresá un ISBN válido de 10 o 13 dígitos, con o sin guiones."
+                   aria-describedby="ayuda-isbn" />
+            <small id="ayuda-isbn" class="form-text text-muted">
+                Ingresá el código ISBN de 10 o 13 dígitos (podés incluir o no los guiones separadores, por ejemplo: 978-987-566-897-9).
+            </small>
         </div>
 
         <div class="form-group mb-3">
             <label for="ddlEditorial" class="form-label fw-semibold">
-                Editorial <span class="text-danger" aria-hidden="true">*</span>
+                Editorial *
             </label>
             <select id="ddlEditorial" name="IdEditorial" class="form-control form-select" required aria-required="true">
                 <option value="">Seleccionar editorial</option>
@@ -63,7 +70,7 @@
 
         <div class="form-group mb-3">
             <label for="txtAnioEdicion" class="form-label fw-semibold">
-                Año de edición <span class="text-danger" aria-hidden="true">*</span>
+                Año de edición *
             </label>
             <input type="number" id="txtAnioEdicion" name="AnioEdicion" class="form-control"
                    value="@(Model != null && Model.AnioEdicion > 0 ? Model.AnioEdicion.ToString() : "")" required aria-required="true" />
@@ -71,7 +78,7 @@
 
         <div class="mb-3 position-relative">
             <label for="buscadorAutores" class="form-label fw-semibold">
-                Autor <span class="text-danger" aria-hidden="true">*</span>
+                Autor *
             </label>
             <input type="text" id="buscadorAutores" class="form-control" placeholder="Escribí para buscar autor..." autocomplete="off" />
             <div id="resultadosAutores" class="list-group position-absolute shadow-sm w-100" style="z-index: 1000; display: none;"></div>
@@ -80,12 +87,27 @@
                 <a href="#" data-bs-toggle="modal" data-bs-target="#modalAutores">Ver lista completa de autores</a>
             </div>
 
-            <div id="contenedorAutoresSeleccionados" class="mt-2"></div>
+            <div id="contenedorAutoresSeleccionados" class="mt-2">
+                @if (Model != null && Model.Autores != null && ViewBag.Autores != null)
+                {
+                    foreach (var autor in ViewBag.Autores)
+                    {
+                        if (Model.Autores.Any(a => a.Id == autor.Id))
+                        {
+                            <span class="badge bg-primary d-inline-flex align-items-center gap-1 p-2 fs-6 m-1" data-id="@autor.Id">
+                                @autor.Nombre @autor.Apellido
+                                <button type="button" class="btn-close btn-close-white btn-sm" aria-label="Eliminar @autor.Nombre @autor.Apellido" onclick="this.parentElement.remove(); document.getElementById('hidden_autores_@autor.Id').remove(); sincronizarCheckboxModal('autores', @autor.Id, false);"></button>
+                            </span>
+                            <input type="hidden" name="IdsAutores" value="@autor.Id" id="hidden_autores_@autor.Id" />
+                        }
+                    }
+                }
+            </div>
         </div>
 
         <div class="mb-3 position-relative">
             <label for="buscadorCategorias" class="form-label fw-semibold">
-                Género <span class="text-danger" aria-hidden="true">*</span>
+                Género *
             </label>
             <input type="text" id="buscadorCategorias" class="form-control" placeholder="Escribí para buscar género..." autocomplete="off" />
             <div id="resultadosCategorias" class="list-group position-absolute shadow-sm w-100" style="z-index: 1000; display: none;"></div>
@@ -94,7 +116,22 @@
                 <a href="#" data-bs-toggle="modal" data-bs-target="#modalCategorias">Ver lista completa de géneros</a>
             </div>
 
-            <div id="contenedorCategoriasSeleccionados" class="mt-2"></div>
+            <div id="contenedorCategoriasSeleccionados" class="mt-2">
+                @if (Model != null && Model.Categorias != null && ViewBag.Categorias != null)
+                {
+                    foreach (var cat in ViewBag.Categorias)
+                    {
+                        if (Model.Categorias.Any(c => c.Id == cat.Id))
+                        {
+                            <span class="badge bg-primary d-inline-flex align-items-center gap-1 p-2 fs-6 m-1" data-id="@cat.Id">
+                                @cat.Descripcion
+                                <button type="button" class="btn-close btn-close-white btn-sm" aria-label="Eliminar @cat.Descripcion" onclick="this.parentElement.remove(); document.getElementById('hidden_categorias_@cat.Id').remove(); sincronizarCheckboxModal('categorias', @cat.Id, false);"></button>
+                            </span>
+                            <input type="hidden" name="IdsCategorias" value="@cat.Id" id="hidden_categorias_@cat.Id" />
+                        }
+                    }
+                }
+            </div>
         </div>
 
         <hr />
@@ -111,11 +148,11 @@
     }
 </main>
 
-<div class="modal fade" id="modalAutores" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalAutores" tabindex="-1" aria-labelledby="tituloModalAutores" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Seleccionar Autores</h5>
+                <h2 class="modal-title h5" id="tituloModalAutores">Seleccionar Autores</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
@@ -140,11 +177,11 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalCategorias" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalCategorias" tabindex="-1" aria-labelledby="tituloModalCategorias" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Seleccionar Géneros</h5>
+                <h2 class="modal-title h5" id="tituloModalCategorias">Seleccionar Géneros</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
