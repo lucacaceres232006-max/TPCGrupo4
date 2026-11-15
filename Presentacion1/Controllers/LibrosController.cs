@@ -201,8 +201,8 @@ namespace Presentacion1.Controllers
             CategoriaNegocio categoriaNegocio = new CategoriaNegocio();
 
             ViewBag.Editoriales = editorialNegocio.listar();
-            ViewBag.Autores = autorNegocio.listar();
-            ViewBag.Categorias = categoriaNegocio.listar();
+            ViewBag.Autores = autorNegocio.listarActivos();
+            ViewBag.Categorias = categoriaNegocio.listarActivos();
         }
     }
 }

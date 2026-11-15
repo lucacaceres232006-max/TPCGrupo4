@@ -12,6 +12,7 @@ namespace Dominio
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Biografia { get; set; }
+        public bool Activo { get; set; }
 
         public override string ToString()
         {

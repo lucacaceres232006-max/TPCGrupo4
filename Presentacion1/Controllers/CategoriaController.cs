@@ -81,34 +81,24 @@ namespace Presentacion.Controllers
             }
         }
 
-        public ActionResult Delete(int id)
+        [HttpPost]
+        public ActionResult Desactivar(int id)
         {
             CategoriaNegocio negocio = new CategoriaNegocio();
-            Categoria seleccionada = negocio.obtenerPorId(id);
+            negocio.eliminar(id);
 
-            if (seleccionada == null)
-                return RedirectToAction("Index");
-
-            return View(seleccionada);
+            return RedirectToAction("Index");
         }
 
-        [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(int id)
+        [HttpPost]
+        public ActionResult Activar(int id)
         {
-            try
-            {
-                CategoriaNegocio negocio = new CategoriaNegocio();
-                negocio.eliminar(id);
+            CategoriaNegocio negocio = new CategoriaNegocio();
+            negocio.activar(id);
 
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                CategoriaNegocio negocio = new CategoriaNegocio();
-                Categoria seleccionada = negocio.obtenerPorId(id);
-                ViewBag.Error = "No se puede eliminar el género porque tiene libros asociados en el catálogo. Detalle: " + ex.Message;
-                return View(seleccionada);
-            }
+            return RedirectToAction("Index");
         }
+
+
     }
 }

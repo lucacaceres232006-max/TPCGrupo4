@@ -79,37 +79,26 @@ namespace Presentacion.Controllers
                 ViewBag.Error = "Ocurrió un error al modificar el autor: " + ex.Message;
                 return View(autor);
             }
+
         }
 
-        public ActionResult Delete(int id)
+        [HttpPost]
+        public ActionResult Desactivar(int id)
         {
             AutorNegocio negocio = new AutorNegocio();
-            Autor seleccionado = negocio.obtenerPorId(id);
+            negocio.eliminar(id);
 
-            if (seleccionado == null)
-                return RedirectToAction("Index");
-
-            return View(seleccionado);
+            return RedirectToAction("Index");
         }
 
-        [HttpPost, ActionName("Delete")]
-        public ActionResult DeleteConfirmed(int id)
+        [HttpPost]
+        public ActionResult Activar(int id)
         {
-            try
-            {
-                AutorNegocio negocio = new AutorNegocio();
-                negocio.eliminar(id);
+            AutorNegocio negocio = new AutorNegocio();
+            negocio.activar(id);
 
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                // Si el autor ya tiene libros asociados en LIBROS_AUTORES, SQL Server impedirá borrarlo por la Foreign Key
-                AutorNegocio negocio = new AutorNegocio();
-                Autor seleccionado = negocio.obtenerPorId(id);
-                ViewBag.Error = "No se puede eliminar el autor porque tiene libros asociados en el catálogo. Detalle: " + ex.Message;
-                return View(seleccionado);
-            }
+            return RedirectToAction("Index");
         }
+
     }
 }
