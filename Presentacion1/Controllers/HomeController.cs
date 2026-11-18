@@ -21,7 +21,7 @@ namespace Presentacion1.Controllers
 
             if (filtroEstado == "Activos")
             {
-                lista = lista.Where(p => p.Estado == "Activo").ToList();
+                lista = lista.Where(p => p.Estado == "Activo" && p.FechaPrevistaDevolucion.Date >= DateTime.Today).ToList();
             }
             else if (filtroEstado == "Vencidos")
             {
@@ -31,7 +31,6 @@ namespace Presentacion1.Controllers
             {
                 lista = lista.Where(p => p.Estado == "Devuelto").ToList();
             }
-
             if (!string.IsNullOrWhiteSpace(buscar))
             {
                 lista = lista.Where(p =>
