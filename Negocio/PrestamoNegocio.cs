@@ -7,7 +7,7 @@ using Dominio;
 
 namespace Negocio
 {
-    class PrestamoNegocio
+    public class PrestamoNegocio
     {
         public List<Prestamo> listar()
         {
