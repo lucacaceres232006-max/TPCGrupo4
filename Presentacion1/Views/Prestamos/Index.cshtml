@@ -69,6 +69,7 @@
                         <th>Fecha de préstamo</th>
                         <th>Vencimiento</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
 
@@ -113,13 +114,36 @@
                                         <span class="badge bg-success">Activo</span>
                                     }
                                 </td>
+                                <td>
+                                    @if (prestamo.Estado == "Activo")
+                                    {
+                                        <form method="post" action="@Url.Action("Devolver", "Prestamos")">
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden" name="id" value="@prestamo.Id" />
+
+                                            <input type="text"
+                                                   name="observaciones"
+                                                   class="form-control form-control-sm mb-2"
+                                                   placeholder="Observaciones (opcional)" />
+
+                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                Registrar devolución
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin acciones</span>
+                                    }
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-4">
+                            <td colspan="7" class="text-center py-4">
                                 No se encontraron préstamos.
                             </td>
                         </tr>

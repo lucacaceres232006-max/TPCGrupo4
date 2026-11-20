@@ -103,6 +103,27 @@ namespace Presentacion1.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Devolver(int id, string observaciones)
+        {
+            try
+            {
+                PrestamoNegocio negocio = new PrestamoNegocio();
+
+                negocio.devolver(id, observaciones);
+
+                TempData["Exito"] = "La devolución se registró correctamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
         private void cargarDatos()
         {
             SocioNegocio socioNegocio = new SocioNegocio();
