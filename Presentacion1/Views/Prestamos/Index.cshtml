@@ -1,4 +1,7 @@
 ﻿
+@model List<Dominio.Prestamo>
+@using System.Collections.Generic
+
 @{
     ViewBag.Title = "Préstamos y devoluciones";
 }
@@ -22,6 +25,7 @@
                         <input type="text"
                                id="buscar"
                                name="buscar"
+                               value="@ViewBag.Buscar"
                                class="form-control"
                                placeholder="Nombre, apellido o DNI" />
                     </div>
@@ -30,9 +34,9 @@
                         <label for="estado" class="form-label">Estado</label>
                         <select id="estado" name="estado" class="form-select">
                             <option value="">Todos los estados</option>
-                            <option value="Activo">Activo</option>
-                            <option value="Vencido">Vencido</option>
-                            <option value="Devuelto">Devuelto</option>
+                            <option value="Activo" @(ViewBag.Estado == "Activo" ? "selected" : "")>Activo</option>
+                            <option value="Vencido" @(ViewBag.Estado == "Vencido" ? "selected" : "")>Vencido</option>
+                            <option value="Devuelto" @(ViewBag.Estado == "Devuelto" ? "selected" : "")>Devuelto</option>
                         </select>
                     </div>
 
@@ -48,9 +52,10 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h4 mb-0">Listado de préstamos</h2>
-        <button type="button" class="btn btn-success" disabled>
+
+        <a href="@Url.Action("Create", "Prestamos")" class="btn btn-success">
             + Registrar préstamo
-        </button>
+        </a>
     </div>
 
     <div class="card shadow-sm">
@@ -64,21 +69,61 @@
                         <th>Fecha de préstamo</th>
                         <th>Vencimiento</th>
                         <th>Estado</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    <tr>
-                        <td colspan="7" class="text-center py-4">
-                            Todavía no hay préstamos cargados en esta pantalla.
-                            <br />
-                            <small class="text-muted">
-                                El listado se conectará con la base de datos
-                                cuando esté disponible la lógica de préstamos.
-                            </small>
-                        </td>
-                    </tr>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var prestamo in Model)
+                        {
+                            bool vencido = prestamo.Estado == "Activo" &&
+                                prestamo.FechaPrevistaDevolucion.Date < DateTime.Today;
+
+                            <tr>
+                                <td>@prestamo.NumeroComprobante</td>
+
+                                <td>
+                                    @prestamo.Socio.Apellido, @prestamo.Socio.Nombre
+                                    <br />
+                                    <small class="text-muted">DNI: @prestamo.Socio.DNI</small>
+                                </td>
+
+                                <td>
+                                    @prestamo.Ejemplar.CodigoInventario
+                                    <br />
+                                    <small class="text-muted">@prestamo.Ejemplar.TituloLibro</small>
+                                </td>
+
+                                <td>@prestamo.FechaInicio.ToString("dd/MM/yyyy")</td>
+
+                                <td>@prestamo.FechaPrevistaDevolucion.ToString("dd/MM/yyyy")</td>
+
+                                <td>
+                                    @if (prestamo.Estado == "Devuelto")
+                                    {
+                                        <span class="badge bg-secondary">Devuelto</span>
+                                    }
+                                    else if (vencido)
+                                    {
+                                        <span class="badge bg-danger">Vencido</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Activo</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                No se encontraron préstamos.
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

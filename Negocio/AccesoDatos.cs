@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace Negocio
@@ -12,6 +10,7 @@ namespace Negocio
         private SqlConnection conexion;
         private SqlCommand comando;
         private SqlDataReader lector;
+        private SqlTransaction transaccion;
 
         public SqlDataReader Lector
         {
@@ -20,15 +19,14 @@ namespace Negocio
 
         public AccesoDatos()
         {
-            // Apuntamos a la base de datos de la biblioteca
             conexion = new SqlConnection("server=.\\SQLEXPRESS; database=BIBLIOTECA_DB; integrated security=true;");
             comando = new SqlCommand();
         }
 
         public void setearConsulta(string consulta)
         {
-            comando.Parameters.Clear(); // Limpia parámetros previos si se reutiliza el objeto
-            comando.CommandType = System.Data.CommandType.Text;
+            comando.Parameters.Clear();
+            comando.CommandType = CommandType.Text;
             comando.CommandText = consulta;
         }
 
@@ -37,15 +35,60 @@ namespace Negocio
             comando.Parameters.AddWithValue(nombre, valor ?? DBNull.Value);
         }
 
+        // Inicia una transacción
+        public void iniciarTransaccion()
+        {
+            if (conexion.State == ConnectionState.Closed)
+                conexion.Open();
+
+            transaccion = conexion.BeginTransaction();
+            comando.Connection = conexion;
+            comando.Transaction = transaccion;
+        }
+
+        // Confirma una transacción
+        public void confirmarTransaccion()
+        {
+            if (transaccion != null)
+            {
+                transaccion.Commit();
+                transaccion.Dispose();
+                transaccion = null;
+                comando.Transaction = null;
+            }
+        }
+
+        // Cancela una transacción
+        public void cancelarTransaccion()
+        {
+            if (transaccion != null)
+            {
+                try
+                {
+                    transaccion.Rollback();
+                }
+                finally
+                {
+                    transaccion.Dispose();
+                    transaccion = null;
+                    comando.Transaction = null;
+                }
+            }
+        }
+
         public void ejecutarLectura()
         {
             comando.Connection = conexion;
+            comando.Transaction = transaccion;
+
             try
             {
-                conexion.Open();
+                if (conexion.State == ConnectionState.Closed)
+                    conexion.Open();
+
                 lector = comando.ExecuteReader();
             }
-            catch (Exception)
+            catch
             {
                 throw;
             }
@@ -54,27 +97,34 @@ namespace Negocio
         public void ejecutarAccion()
         {
             comando.Connection = conexion;
+            comando.Transaction = transaccion;
+
             try
             {
-                conexion.Open();
+                if (conexion.State == ConnectionState.Closed)
+                    conexion.Open();
+
                 comando.ExecuteNonQuery();
             }
-            catch (Exception)
+            catch
             {
                 throw;
             }
         }
 
-        // Ideal para hacer INSERT con OUTPUT INSERTED.Id o SCOPE_IDENTITY() y recuperar el Id generado
         public int ejecutarAccionScalar()
         {
             comando.Connection = conexion;
+            comando.Transaction = transaccion;
+
             try
             {
-                conexion.Open();
-                return int.Parse(comando.ExecuteScalar().ToString());
+                if (conexion.State == ConnectionState.Closed)
+                    conexion.Open();
+
+                return Convert.ToInt32(comando.ExecuteScalar());
             }
-            catch (Exception)
+            catch
             {
                 throw;
             }
@@ -83,9 +133,18 @@ namespace Negocio
         public void cerrarConexion()
         {
             if (lector != null)
-                lector.Close();
+            {
+                if (!lector.IsClosed)
+                    lector.Close();
 
-            if (conexion != null && conexion.State == System.Data.ConnectionState.Open)
+                lector = null;
+            }
+
+            // Si quedó una transacción pendiente, se cancela.
+            if (transaccion != null)
+                cancelarTransaccion();
+
+            if (conexion != null && conexion.State == ConnectionState.Open)
                 conexion.Close();
         }
     }

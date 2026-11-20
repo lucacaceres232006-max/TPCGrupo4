@@ -90,5 +90,142 @@ namespace Negocio
             }
         }
 
+        public void agregar(Prestamo nuevo)
+        {
+            if (nuevo == null || nuevo.Socio == null || nuevo.Ejemplar == null)
+                throw new Exception("Los datos del préstamo están incompletos.");
+
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.iniciarTransaccion();
+
+                // 1. Obtener los días de duración de la política
+                datos.setearConsulta(@"
+            SELECT ISNULL(
+                (SELECT PP.DiasDuracion
+                 FROM SOCIOS S
+                 INNER JOIN POLITICAS_PRESTAMO PP
+                    ON S.IdPoliticaPrestamo = PP.Id
+                 WHERE S.Id = @IdSocio
+                 AND S.Habilitado = 1), 0)");
+
+                datos.setearParametro("@IdSocio", nuevo.Socio.Id);
+
+                int diasDuracion = datos.ejecutarAccionScalar();
+
+                if (diasDuracion <= 0)
+                    throw new Exception("El socio no está habilitado o no tiene una política válida.");
+
+                // 2. Obtener la cantidad máxima de ejemplares
+                datos.setearConsulta(@"
+            SELECT ISNULL(
+                (SELECT PP.CantidadMaximaEjemplares
+                 FROM SOCIOS S
+                 INNER JOIN POLITICAS_PRESTAMO PP
+                    ON S.IdPoliticaPrestamo = PP.Id
+                 WHERE S.Id = @IdSocio
+                 AND S.Habilitado = 1), 0)");
+
+                datos.setearParametro("@IdSocio", nuevo.Socio.Id);
+
+                int cantidadMaxima = datos.ejecutarAccionScalar();
+
+                // 3. Contar los préstamos activos del socio
+                datos.setearConsulta(@"
+            SELECT COUNT(*)
+            FROM PRESTAMOS WITH (UPDLOCK, HOLDLOCK)
+            WHERE IdSocio = @IdSocio
+            AND Estado = 'Activo'");
+
+                datos.setearParametro("@IdSocio", nuevo.Socio.Id);
+
+                int prestamosActivos = datos.ejecutarAccionScalar();
+
+                if (prestamosActivos >= cantidadMaxima)
+                    throw new Exception("El socio alcanzó el límite máximo de préstamos.");
+
+                // 4. Generar el siguiente número de comprobante
+                datos.setearConsulta(@"
+            SELECT ISNULL(
+                MAX(TRY_CONVERT(BIGINT, SUBSTRING(NumeroComprobante, 6, 45))),
+                0
+            ) + 1
+            FROM PRESTAMOS WITH (UPDLOCK, HOLDLOCK)
+            WHERE NumeroComprobante LIKE 'COMP-%'");
+
+                int siguienteNumero = datos.ejecutarAccionScalar();
+
+                string comprobante = "COMP-" + siguienteNumero.ToString("D4");
+
+                // 5. Cambiar el estado del ejemplar
+                datos.setearConsulta(@"
+            UPDATE EJEMPLARES
+            SET Estado = 'Prestado'
+            WHERE Id = @IdEjemplar
+            AND Estado = 'Disponible';
+
+            SELECT @@ROWCOUNT;");
+
+                datos.setearParametro("@IdEjemplar", nuevo.Ejemplar.Id);
+
+                int ejemplarActualizado = datos.ejecutarAccionScalar();
+
+                if (ejemplarActualizado != 1)
+                    throw new Exception("El ejemplar no existe o no está disponible.");
+
+                // 6. Registrar el préstamo
+                datos.setearConsulta(@"
+            INSERT INTO PRESTAMOS
+            (
+                NumeroComprobante,
+                IdSocio,
+                IdEjemplar,
+                FechaPrevistaDevolucion,
+                CantidadRenovaciones,
+                Estado
+            )
+            VALUES
+            (
+                @NumeroComprobante,
+                @IdSocio,
+                @IdEjemplar,
+                DATEADD(DAY, @DiasDuracion, GETDATE()),
+                0,
+                'Activo'
+            );
+
+            SELECT CAST(SCOPE_IDENTITY() AS INT);");
+
+                datos.setearParametro("@NumeroComprobante", comprobante);
+                datos.setearParametro("@IdSocio", nuevo.Socio.Id);
+                datos.setearParametro("@IdEjemplar", nuevo.Ejemplar.Id);
+                datos.setearParametro("@DiasDuracion", diasDuracion);
+
+                int idGenerado = datos.ejecutarAccionScalar();
+
+                // 7. Confirmar la transacción
+                datos.confirmarTransaccion();
+
+                // Actualizar el objeto recibido
+                nuevo.Id = idGenerado;
+                nuevo.NumeroComprobante = comprobante;
+                nuevo.Estado = "Activo";
+                nuevo.CantidadRenovaciones = 0;
+                nuevo.Ejemplar.Estado = "Prestado";
+            }
+            catch
+            {
+                datos.cancelarTransaccion();
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+
     }
 }

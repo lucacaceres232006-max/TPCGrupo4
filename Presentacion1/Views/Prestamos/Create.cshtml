@@ -1,0 +1,86 @@
+﻿@using System.Collections.Generic
+@using System.Web.Mvc
+@model Dominio.Prestamo
+
+@{
+    ViewBag.Title = "Registrar préstamo";
+}
+
+<div class="container mt-4">
+
+    <h2>Registrar préstamo</h2>
+    <p class="text-muted">Seleccioná el socio y el ejemplar que desea llevar.</p>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-body">
+
+            @using (Html.BeginForm("Create", "Prestamos", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-group mb-3">
+                    <label>Socio</label>
+
+                    @Html.DropDownList(
+                                  "idSocio",
+                                  new SelectList(
+                                      ViewBag.Socios,
+                                      "Id",
+                                      null,
+                                      Model.Socio != null ? Model.Socio.Id : 0
+                                  ),
+                                  "Seleccionar socio",
+                                  new { @class = "form-control", required = "required" }
+                              )
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Ejemplar disponible</label>
+
+                    @Html.DropDownList(
+                                  "idEjemplar",
+                                  new SelectList(
+                                      ((IEnumerable<Dominio.Ejemplar>)ViewBag.Ejemplares)
+                                          .Select(e => new
+                                          {
+                                              e.Id,
+                                              Descripcion = e.CodigoInventario + " - " + e.TituloLibro
+                                          }),
+                                      "Id",
+                                      "Descripcion",
+                                      Model.Ejemplar != null ? Model.Ejemplar.Id : 0
+                                  ),
+                                  "Seleccionar ejemplar",
+                                  new { @class = "form-control", required = "required" }
+                              )
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Importante:</strong>
+                    El número de comprobante y la fecha de devolución
+                    se generan automáticamente según la política del socio.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Registrar préstamo
+                    </button>
+
+                    <a href="@Url.Action("Index", "Prestamos")"
+                       class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
