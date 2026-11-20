@@ -226,6 +226,82 @@ namespace Negocio
             }
         }
 
+        public void devolver(int idPrestamo, string observaciones)
+        {
+            if (idPrestamo <= 0)
+                throw new Exception("El préstamo seleccionado no es válido.");
+
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.iniciarTransaccion();
+
+                // 1. Obtener el ejemplar del préstamo activo.
+                datos.setearConsulta(@"
+            SELECT ISNULL(
+                (SELECT IdEjemplar
+                 FROM PRESTAMOS WITH (UPDLOCK, HOLDLOCK)
+                 WHERE Id = @IdPrestamo
+                 AND Estado = 'Activo'), 0)");
+
+                datos.setearParametro("@IdPrestamo", idPrestamo);
+
+                int idEjemplar = datos.ejecutarAccionScalar();
+
+                if (idEjemplar <= 0)
+                    throw new Exception("El préstamo no existe o ya fue devuelto.");
+
+                // 2. Registrar la devolución del préstamo.
+                datos.setearConsulta(@"
+            UPDATE PRESTAMOS
+            SET Estado = 'Devuelto',
+                FechaDevolucionReal = GETDATE(),
+                ObservacionesDevolucion = @Observaciones
+            WHERE Id = @IdPrestamo
+            AND Estado = 'Activo';
+
+            SELECT @@ROWCOUNT;");
+
+                datos.setearParametro("@IdPrestamo", idPrestamo);
+                datos.setearParametro("@Observaciones", observaciones);
+
+                int prestamosActualizados = datos.ejecutarAccionScalar();
+
+                if (prestamosActualizados != 1)
+                    throw new Exception("No se pudo registrar la devolución.");
+
+                // 3. Volver a dejar disponible el ejemplar.
+                datos.setearConsulta(@"
+            UPDATE EJEMPLARES
+            SET Estado = 'Disponible'
+            WHERE Id = @IdEjemplar
+            AND Estado = 'Prestado';
+
+            SELECT @@ROWCOUNT;");
+
+                datos.setearParametro("@IdEjemplar", idEjemplar);
+
+                int ejemplaresActualizados = datos.ejecutarAccionScalar();
+
+                if (ejemplaresActualizados != 1)
+                    throw new Exception("No se pudo actualizar el estado del ejemplar.");
+
+                // 4. Confirmar ambas modificaciones.
+                datos.confirmarTransaccion();
+            }
+            catch
+            {
+                datos.cancelarTransaccion();
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+
 
     }
 }
