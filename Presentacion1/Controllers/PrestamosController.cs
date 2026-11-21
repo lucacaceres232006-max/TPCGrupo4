@@ -152,5 +152,25 @@ namespace Presentacion1.Controllers
                 .Where(e => e.Estado == "Disponible")
                 .ToList();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Extender(int id)
+        {
+            try
+            {
+                PrestamoNegocio negocio = new PrestamoNegocio();
+                negocio.extender(id);
+
+                TempData["Exito"] = "El préstamo se extendió correctamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
     }
 }
