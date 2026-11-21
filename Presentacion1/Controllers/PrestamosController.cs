@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Linq;
 using System.Web.Mvc;
 using Dominio;
@@ -15,20 +14,22 @@ namespace Presentacion1.Controllers
 
             var prestamos = negocio.listar();
 
-            // Buscar por nombre, apellido o DNI del socio.
             if (!string.IsNullOrWhiteSpace(buscar))
             {
                 prestamos = prestamos.Where(p =>
-                    p.Socio != null &&
-                    (
+                    (!string.IsNullOrEmpty(p.NumeroComprobante) && p.NumeroComprobante.IndexOf(buscar, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (p.Socio != null && (
                         (p.Socio.Nombre ?? "").IndexOf(buscar, StringComparison.OrdinalIgnoreCase) >= 0 ||
                         (p.Socio.Apellido ?? "").IndexOf(buscar, StringComparison.OrdinalIgnoreCase) >= 0 ||
                         (p.Socio.DNI ?? "").IndexOf(buscar, StringComparison.OrdinalIgnoreCase) >= 0
-                    )
+                    )) ||
+                    (p.Ejemplar != null && (
+                        (p.Ejemplar.CodigoInventario ?? "").IndexOf(buscar, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        (p.Ejemplar.TituloLibro ?? "").IndexOf(buscar, StringComparison.OrdinalIgnoreCase) >= 0
+                    ))
                 ).ToList();
             }
 
-            // Filtrar por estado.
             if (estado == "Activo")
             {
                 prestamos = prestamos.Where(p =>
@@ -59,7 +60,6 @@ namespace Presentacion1.Controllers
         public ActionResult Create()
         {
             cargarDatos();
-
             return View(new Prestamo());
         }
 
@@ -84,9 +84,7 @@ namespace Presentacion1.Controllers
                 PrestamoNegocio negocio = new PrestamoNegocio();
                 negocio.agregar(nuevo);
 
-                TempData["Exito"] =
-                    "Préstamo registrado correctamente. Comprobante: "
-                    + nuevo.NumeroComprobante;
+                TempData["Exito"] = "Préstamo registrado correctamente. Comprobante: " + nuevo.NumeroComprobante;
 
                 return RedirectToAction("Index");
             }
@@ -110,7 +108,6 @@ namespace Presentacion1.Controllers
             try
             {
                 PrestamoNegocio negocio = new PrestamoNegocio();
-
                 negocio.devolver(id, observaciones);
 
                 TempData["Exito"] = "La devolución se registró correctamente.";
@@ -122,7 +119,6 @@ namespace Presentacion1.Controllers
 
             return RedirectToAction("Index");
         }
-
 
         private void cargarDatos()
         {

@@ -1,4 +1,5 @@
 ﻿@using System.Collections.Generic
+@using System.Linq
 @using System.Web.Mvc
 @model Dominio.Prestamo
 
@@ -6,66 +7,68 @@
     ViewBag.Title = "Registrar préstamo";
 }
 
-<div class="container mt-4">
-
-    <h2>Registrar préstamo</h2>
-    <p class="text-muted">Seleccioná el socio y el ejemplar que desea llevar.</p>
+<main class="container mt-4" aria-labelledby="titulo-registrar-prestamo">
+    <h1 id="titulo-registrar-prestamo" class="h2">Registrar préstamo</h1>
+    <p id="instrucciones-prestamo" class="text-muted">
+        Seleccioná el socio habilitado y el ejemplar disponible. Todos los campos marcados con * son obligatorios.
+    </p>
 
     @if (ViewBag.Error != null)
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger" role="alert" aria-live="assertive">
             @ViewBag.Error
         </div>
     }
 
     <div class="card shadow-sm mt-3">
         <div class="card-body">
-
-            @using (Html.BeginForm("Create", "Prestamos", FormMethod.Post))
+            @using (Html.BeginForm("Create", "Prestamos", FormMethod.Post, new { aria_describedby = "instrucciones-prestamo" }))
             {
                 @Html.AntiForgeryToken()
 
                 <div class="form-group mb-3">
-                    <label>Socio</label>
-
+                    <label for="idSocio" class="form-label fw-semibold">Socio *</label>
                     @Html.DropDownList(
-                                  "idSocio",
-                                  new SelectList(
-                                      ViewBag.Socios,
-                                      "Id",
-                                      null,
-                                      Model.Socio != null ? Model.Socio.Id : 0
-                                  ),
-                                  "Seleccionar socio",
-                                  new { @class = "form-control", required = "required" }
-                              )
+                        "idSocio",
+                        new SelectList(
+                            ((IEnumerable<Dominio.Socio>)ViewBag.Socios)
+                                .Select(s => new
+                                {
+                                    s.Id,
+                                    Descripcion = s.Apellido + ", " + s.Nombre + " (DNI: " + s.DNI + ")"
+                                }),
+                            "Id",
+                            "Descripcion",
+                            Model != null && Model.Socio != null ? Model.Socio.Id : 0
+                        ),
+                        "Seleccionar socio",
+                        new { id = "idSocio", @class = "form-select", required = "required", aria_required = "true" }
+                    )
                 </div>
 
                 <div class="form-group mb-3">
-                    <label>Ejemplar disponible</label>
-
+                    <label for="idEjemplar" class="form-label fw-semibold">Ejemplar disponible *</label>
                     @Html.DropDownList(
-                                  "idEjemplar",
-                                  new SelectList(
-                                      ((IEnumerable<Dominio.Ejemplar>)ViewBag.Ejemplares)
-                                          .Select(e => new
-                                          {
-                                              e.Id,
-                                              Descripcion = e.CodigoInventario + " - " + e.TituloLibro
-                                          }),
-                                      "Id",
-                                      "Descripcion",
-                                      Model.Ejemplar != null ? Model.Ejemplar.Id : 0
-                                  ),
-                                  "Seleccionar ejemplar",
-                                  new { @class = "form-control", required = "required" }
-                              )
+                        "idEjemplar",
+                        new SelectList(
+                            ((IEnumerable<Dominio.Ejemplar>)ViewBag.Ejemplares)
+                                .Select(e => new
+                                {
+                                    e.Id,
+                                    Descripcion = e.CodigoInventario + " - " + e.TituloLibro
+                                }),
+                            "Id",
+                            "Descripcion",
+                            Model != null && Model.Ejemplar != null ? Model.Ejemplar.Id : 0
+                        ),
+                        "Seleccionar ejemplar",
+                        new { id = "idEjemplar", @class = "form-select", required = "required", aria_required = "true" }
+                    )
                 </div>
 
-                <div class="alert alert-info">
+                <div class="alert alert-info" role="status">
                     <strong>Importante:</strong>
-                    El número de comprobante y la fecha de devolución
-                    se generan automáticamente según la política del socio.
+                    El número de comprobante y la fecha de devolución se generan automáticamente según la política del socio.
                 </div>
 
                 <div class="d-flex gap-2">
@@ -73,14 +76,11 @@
                         Registrar préstamo
                     </button>
 
-                    <a href="@Url.Action("Index", "Prestamos")"
-                       class="btn btn-secondary">
+                    <a href="@Url.Action("Index", "Prestamos")" class="btn btn-secondary">
                         Cancelar
                     </a>
                 </div>
             }
-
         </div>
     </div>
-
-</div>
+</main>
