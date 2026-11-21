@@ -95,6 +95,7 @@
                         {
                             bool vencido = prestamo.Estado == "Activo" &&
                                 prestamo.FechaPrevistaDevolucion.Date < DateTime.Today;
+                            int diasExtension = (prestamo.Socio.PoliticaPrestamo.DiasDuracion + 1) / 2;
 
                             <tr class="@(vencido ? "table-danger" : "")">
                                 <th scope="row" class="fw-semibold">@prestamo.NumeroComprobante</th>
@@ -151,7 +152,7 @@
 
                                                     <button type="submit"
                                                             class="btn btn-primary btn-sm text-nowrap"
-                                                            onclick="return confirm('¿Querés extender este préstamo?');">
+                                                            onclick="return confirm('La política de este socio establece @prestamo.Socio.PoliticaPrestamo.DiasDuracion días de préstamo. Al extenderlo se agregarán @diasExtension días a la fecha de vencimiento. ¿Deseás continuar?');">
                                                         Extender préstamo
                                                     </button>
                                                 }
