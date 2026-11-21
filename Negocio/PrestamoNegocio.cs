@@ -299,6 +299,109 @@ namespace Negocio
             }
         }
 
+        public void extender(int idPrestamo)
+        {
+            if (idPrestamo <= 0)
+                throw new Exception("El préstamo seleccionado no es válido.");
+
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.iniciarTransaccion();
+
+                datos.setearConsulta(@"
+            SELECT
+                P.Estado,
+                P.CantidadRenovaciones,
+                PP.LimiteRenovaciones,
+                PP.Descripcion
+            FROM PRESTAMOS P WITH (UPDLOCK, HOLDLOCK)
+            INNER JOIN SOCIOS S ON P.IdSocio = S.Id
+            INNER JOIN POLITICAS_PRESTAMO PP
+                ON S.IdPoliticaPrestamo = PP.Id
+            WHERE P.Id = @IdPrestamo");
+
+                datos.setearParametro("@IdPrestamo", idPrestamo);
+                datos.ejecutarLectura();
+
+                string estado = "";
+                string politica = "";
+                int renovaciones = 0;
+                int limite = 0;
+
+                if (datos.Lector.Read())
+                {
+                    estado = datos.Lector["Estado"].ToString();
+                    politica = datos.Lector["Descripcion"].ToString();
+                    renovaciones = Convert.ToInt32(datos.Lector["CantidadRenovaciones"]);
+                    limite = Convert.ToInt32(datos.Lector["LimiteRenovaciones"]);
+                }
+                else
+                {
+                    throw new Exception("No se encontró el préstamo.");
+                }
+
+                datos.Lector.Close();
+
+                if (estado != "Activo")
+                    throw new Exception("Solo se pueden extender préstamos activos.");
+
+                if (renovaciones >= limite)
+                    throw new Exception("El préstamo alcanzó el límite de renovaciones.");
+
+                int diasExtension;
+
+                switch (politica.Trim().ToLowerInvariant())
+                {
+                    case "socio general":
+                        diasExtension = 4;
+                        break;
+
+                    case "estudiante universitario":
+                        diasExtension = 10;
+                        break;
+
+                    case "investigador / docente":
+                        diasExtension = 20;
+                        break;
+
+                    default:
+                        throw new Exception("La política del socio no tiene una extensión configurada.");
+                }
+
+                datos.setearConsulta(@"
+            UPDATE PRESTAMOS
+            SET FechaPrevistaDevolucion =
+                    DATEADD(DAY, @DiasExtension, FechaPrevistaDevolucion),
+                CantidadRenovaciones = CantidadRenovaciones + 1
+            WHERE Id = @IdPrestamo
+              AND Estado = 'Activo';
+
+            SELECT @@ROWCOUNT;");
+
+                datos.setearParametro("@DiasExtension", diasExtension);
+                datos.setearParametro("@IdPrestamo", idPrestamo);
+
+                int actualizados = datos.ejecutarAccionScalar();
+
+                if (actualizados != 1)
+                    throw new Exception("No se pudo extender el préstamo.");
+
+                datos.confirmarTransaccion();
+            }
+            catch
+            {
+                datos.cancelarTransaccion();
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+
 
     }
 }
