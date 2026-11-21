@@ -315,7 +315,7 @@ namespace Negocio
                 P.Estado,
                 P.CantidadRenovaciones,
                 PP.LimiteRenovaciones,
-                PP.Descripcion
+                PP.DiasDuracion
             FROM PRESTAMOS P WITH (UPDLOCK, HOLDLOCK)
             INNER JOIN SOCIOS S ON P.IdSocio = S.Id
             INNER JOIN POLITICAS_PRESTAMO PP
@@ -325,17 +325,17 @@ namespace Negocio
                 datos.setearParametro("@IdPrestamo", idPrestamo);
                 datos.ejecutarLectura();
 
-                string estado = "";
-                string politica = "";
-                int renovaciones = 0;
-                int limite = 0;
+                string estado;
+                int renovaciones;
+                int limite;
+                int diasDuracion;
 
                 if (datos.Lector.Read())
                 {
                     estado = datos.Lector["Estado"].ToString();
-                    politica = datos.Lector["Descripcion"].ToString();
                     renovaciones = Convert.ToInt32(datos.Lector["CantidadRenovaciones"]);
                     limite = Convert.ToInt32(datos.Lector["LimiteRenovaciones"]);
+                    diasDuracion = Convert.ToInt32(datos.Lector["DiasDuracion"]);
                 }
                 else
                 {
@@ -350,25 +350,10 @@ namespace Negocio
                 if (renovaciones >= limite)
                     throw new Exception("El préstamo alcanzó el límite de renovaciones.");
 
-                int diasExtension;
+                if (diasDuracion <= 0)
+                    throw new Exception("La política de préstamo no tiene una duración válida.");
 
-                switch (politica.Trim().ToLowerInvariant())
-                {
-                    case "socio general":
-                        diasExtension = 4;
-                        break;
-
-                    case "estudiante universitario":
-                        diasExtension = 10;
-                        break;
-
-                    case "investigador / docente":
-                        diasExtension = 20;
-                        break;
-
-                    default:
-                        throw new Exception("La política del socio no tiene una extensión configurada.");
-                }
+                int diasExtension = (diasDuracion + 1) / 2;
 
                 datos.setearConsulta(@"
             UPDATE PRESTAMOS
@@ -400,6 +385,8 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+
+
 
 
 
