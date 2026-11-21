@@ -142,6 +142,24 @@
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalDevolucion"
                                                 aria-label="Registrar devolución del préstamo @prestamo.NumeroComprobante de @prestamo.Socio.Apellido, @prestamo.Socio.Nombre"
+                                                
+                                               @if (prestamo.CantidadRenovaciones <
+                                                  prestamo.Socio.PoliticaPrestamo.LimiteRenovaciones)
+                                                {
+                                                   using (Html.BeginForm("Extender", "Prestamos", FormMethod.Post,
+                                                     new { @class = "d-inline" }))
+                                                   {
+                                                           @Html.AntiForgeryToken()
+                                                         <input type="hidden" name="id" value="@prestamo.Id" />
+
+                                                        <button type="submit"
+                                                            class="btn btn-primary btn-sm me-1"
+                                                                onclick="return confirm('¿Querés extender este préstamo?');">
+                                                                   Extender préstamo
+                                                           </button>
+                                                   }
+                                                }
+
                                                 onclick="prepararDevolucion(@prestamo.Id, '@prestamo.NumeroComprobante', '@prestamo.Ejemplar.CodigoInventario - @prestamo.Ejemplar.TituloLibro', '@prestamo.Socio.Apellido, @prestamo.Socio.Nombre')">
                                             Registrar devolución
                                         </button>
