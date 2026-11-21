@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -9,10 +10,21 @@
 </head>
 <body>
     <div class="container body-content">
+
+        @if (ViewContext.RouteData.Values["controller"].ToString() != "Home")
+        {
+            <div class="mb-3 mt-3">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                    ← Volver al inicio
+                </a>
+            </div>
+        }
+
         @RenderBody()
+
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Gestión de Biblioteca</p>
         </footer>
     </div>
 
