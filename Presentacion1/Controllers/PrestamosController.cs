@@ -119,15 +119,33 @@ namespace Presentacion1.Controllers
 
             return RedirectToAction("Index");
         }
-
         private void cargarDatos()
         {
             SocioNegocio socioNegocio = new SocioNegocio();
             EjemplarNegocio ejemplarNegocio = new EjemplarNegocio();
+            PrestamoNegocio prestamoNegocio = new PrestamoNegocio();
 
-            ViewBag.Socios = socioNegocio.listar()
+            var sociosHabilitados = socioNegocio.listar()
                 .Where(s => s.Habilitado)
                 .ToList();
+
+            var prestamosActivos = prestamoNegocio.listar()
+                .Where(p => p.Estado == "Activo" && p.Socio != null)
+                .GroupBy(p => p.Socio.Id)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            ViewBag.Socios = sociosHabilitados;
+            ViewBag.SociosDetalle = sociosHabilitados.Select(s => new
+            {
+                s.Id,
+                s.Nombre,
+                s.Apellido,
+                s.DNI,
+                Politica = s.PoliticaPrestamo != null ? s.PoliticaPrestamo.Descripcion : "Sin política",
+                MaxPrestamos = s.PoliticaPrestamo != null ? s.PoliticaPrestamo.CantidadMaximaEjemplares : 0,
+                DiasDuracion = s.PoliticaPrestamo != null ? s.PoliticaPrestamo.DiasDuracion : 0,
+                PrestamosActivos = prestamosActivos.ContainsKey(s.Id) ? prestamosActivos[s.Id] : 0
+            }).ToList();
 
             ViewBag.Ejemplares = ejemplarNegocio.listar()
                 .Where(e => e.Estado == "Disponible")

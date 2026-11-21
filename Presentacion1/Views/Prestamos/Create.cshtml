@@ -5,12 +5,22 @@
 
 @{
     ViewBag.Title = "Registrar préstamo";
+    var sociosHabilitados = ((IEnumerable<Dominio.Socio>)ViewBag.Socios ?? Enumerable.Empty<Dominio.Socio>())
+        .Where(s => s.Habilitado)
+        .ToList();
+    var ejemplaresDisponibles = ((IEnumerable<Dominio.Ejemplar>)ViewBag.Ejemplares ?? Enumerable.Empty<Dominio.Ejemplar>())
+        .Where(e => e.Estado == "Disponible")
+        .ToList();
 }
+
+<script>
+    window.sociosHabilitadosData = @Html.Raw(Json.Encode(ViewBag.SociosDetalle));
+</script>
 
 <main class="container mt-4" aria-labelledby="titulo-registrar-prestamo">
     <h1 id="titulo-registrar-prestamo" class="h2">Registrar préstamo</h1>
     <p id="instrucciones-prestamo" class="text-muted">
-        Seleccioná el socio habilitado y el ejemplar disponible. Todos los campos marcados con * son obligatorios.
+        Seleccioná el socio habilitado y el ejemplar disponible. Podés usar los cuadros de búsqueda rápida para filtrar los desplegables. Todos los campos marcados con * son obligatorios.
     </p>
 
     @if (ViewBag.Error != null)
@@ -26,44 +36,87 @@
             {
                 @Html.AntiForgeryToken()
 
-                <div class="form-group mb-3">
-                    <label for="idSocio" class="form-label fw-semibold">Socio *</label>
-                    @Html.DropDownList(
-                        "idSocio",
-                        new SelectList(
-                            ((IEnumerable<Dominio.Socio>)ViewBag.Socios)
-                                .Select(s => new
+                <div class="mb-4 p-3 border rounded bg-light">
+                    <div class="form-group mb-2">
+                        <label for="txtBuscarSocio" class="form-label fw-semibold">Buscar socio activo por DNI, apellido o nombre</label>
+                        <input type="text"
+                               id="txtBuscarSocio"
+                               class="form-control"
+                               placeholder="Escribí el DNI o apellido para seleccionar automáticamente..."
+                               autocomplete="off" />
+                        <div id="estadoBusquedaSocio" class="form-text text-primary" role="status" aria-live="polite"></div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="idSocio" class="form-label fw-semibold">Socio activo *</label>
+                        @Html.DropDownList(
+                            "idSocio",
+                            new SelectList(
+                                sociosHabilitados.Select(s => new
                                 {
                                     s.Id,
-                                    Descripcion = s.Apellido + ", " + s.Nombre + " (DNI: " + s.DNI + ")"
+                                    Descripcion = s.Apellido + ", " + s.Nombre + " (DNI: " + s.DNI + ") - Máx. " +
+                                        (s.PoliticaPrestamo != null ? s.PoliticaPrestamo.CantidadMaximaEjemplares : 0) +
+                                        ((s.PoliticaPrestamo != null && s.PoliticaPrestamo.CantidadMaximaEjemplares == 1) ? " préstamo" : " préstamos")
                                 }),
-                            "Id",
-                            "Descripcion",
-                            Model != null && Model.Socio != null ? Model.Socio.Id : 0
-                        ),
-                        "Seleccionar socio",
-                        new { id = "idSocio", @class = "form-select", required = "required", aria_required = "true" }
-                    )
+                                "Id",
+                                "Descripcion",
+                                Model != null && Model.Socio != null ? Model.Socio.Id : 0
+                            ),
+                            "Seleccionar socio",
+                            new { id = "idSocio", @class = "form-select", required = "required", aria_required = "true" }
+                        )
+                    </div>
+
+                    <div id="resumenSocioPanel" class="card border-info bg-white d-none" role="region" aria-label="Detalle de política y fechas del socio" aria-live="polite">
+                        <div class="card-body py-2 px-3">
+                            <div class="row g-2 small">
+                                <div class="col-md-6">
+                                    <strong>Política:</strong> <span id="lblPoliticaSocio"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Préstamos activos:</strong> <span id="lblActivosSocio"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Fecha de inicio:</strong> <span id="lblFechaInicioPrestamo"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Fecha prevista de devolución:</strong> <span id="lblFechaDevolucionPrestamo"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group mb-3">
-                    <label for="idEjemplar" class="form-label fw-semibold">Ejemplar disponible *</label>
-                    @Html.DropDownList(
-                        "idEjemplar",
-                        new SelectList(
-                            ((IEnumerable<Dominio.Ejemplar>)ViewBag.Ejemplares)
-                                .Select(e => new
+                <div class="mb-4 p-3 border rounded bg-light">
+                    <div class="form-group mb-2">
+                        <label for="txtBuscarEjemplar" class="form-label fw-semibold">Buscar ejemplar por código de inventario o título</label>
+                        <input type="text"
+                               id="txtBuscarEjemplar"
+                               class="form-control"
+                               placeholder="Escribí el código de inventario o título del libro..."
+                               autocomplete="off" />
+                        <div id="estadoBusquedaEjemplar" class="form-text text-primary" role="status" aria-live="polite"></div>
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label for="idEjemplar" class="form-label fw-semibold">Ejemplar disponible *</label>
+                        @Html.DropDownList(
+                            "idEjemplar",
+                            new SelectList(
+                                ejemplaresDisponibles.Select(e => new
                                 {
                                     e.Id,
                                     Descripcion = e.CodigoInventario + " - " + e.TituloLibro
                                 }),
-                            "Id",
-                            "Descripcion",
-                            Model != null && Model.Ejemplar != null ? Model.Ejemplar.Id : 0
-                        ),
-                        "Seleccionar ejemplar",
-                        new { id = "idEjemplar", @class = "form-select", required = "required", aria_required = "true" }
-                    )
+                                "Id",
+                                "Descripcion",
+                                Model != null && Model.Ejemplar != null ? Model.Ejemplar.Id : 0
+                            ),
+                            "Seleccionar ejemplar",
+                            new { id = "idEjemplar", @class = "form-select", required = "required", aria_required = "true" }
+                        )
+                    </div>
                 </div>
 
                 <div class="alert alert-info" role="status">
@@ -84,3 +137,5 @@
         </div>
     </div>
 </main>
+
+<script src="~/Scripts/prestamos-filtro-select.js"></script>
