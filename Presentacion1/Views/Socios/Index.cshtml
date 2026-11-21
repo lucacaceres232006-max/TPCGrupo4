@@ -88,12 +88,30 @@
                                        aria-label="Modificar datos del socio @socio.Apellido, @socio.Nombre">
                                         Modificar
                                     </a>
-                                    <a href="@Url.Action("Delete", "Socios", new { id = socio.Id })"
-                                       class="btn btn-danger btn-sm"
-                                       aria-label="Eliminar socio @socio.Apellido, @socio.Nombre"
-                                       onclick="return confirm('¿Estás seguro de que querés eliminar al socio @socio.Apellido, @socio.Nombre?');">
-                                        Eliminar
-                                    </a>
+
+                                    @if (socio.Habilitado)
+                                    {
+                                        using (Html.BeginForm("CambiarEstado", "Socios", new { id = socio.Id, habilitado = false }, FormMethod.Post, new { @class = "d-inline" }))
+                                        {
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm"
+                                                    aria-label="Deshabilitar socio @socio.Apellido, @socio.Nombre"
+                                                    onclick="return confirm('¿Estás seguro de que querés deshabilitar al socio @socio.Apellido, @socio.Nombre?');">
+                                                Deshabilitar
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        using (Html.BeginForm("CambiarEstado", "Socios", new { id = socio.Id, habilitado = true }, FormMethod.Post, new { @class = "d-inline" }))
+                                        {
+                                            <button type="submit"
+                                                    class="btn btn-outline-success btn-sm"
+                                                    aria-label="Habilitar socio @socio.Apellido, @socio.Nombre">
+                                                Habilitar
+                                            </button>
+                                        }
+                                    }
                                 </td>
                             </tr>
                         }

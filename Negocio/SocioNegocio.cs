@@ -197,18 +197,14 @@ namespace Negocio
             }
         }
 
-        public void eliminar(int id)
+        public void cambiarEstado(int id, bool habilitado)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta(@"
-                    IF EXISTS (SELECT 1 FROM PRESTAMOS WHERE IdSocio = @id)
-                        THROW 50001, 'No se puede eliminar el socio porque posee un historial de préstamos. Se recomienda suspenderlo en su lugar.', 1;
-
-                    DELETE FROM SOCIOS WHERE Id = @id;");
-
+                datos.setearConsulta("UPDATE SOCIOS SET Habilitado = @habilitado WHERE Id = @id");
+                datos.setearParametro("@habilitado", habilitado);
                 datos.setearParametro("@id", id);
                 datos.ejecutarAccion();
             }

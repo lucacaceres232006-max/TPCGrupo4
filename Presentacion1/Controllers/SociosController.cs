@@ -95,14 +95,18 @@ namespace Presentacion.Controllers
             }
         }
 
-        public ActionResult Delete(int id)
+        [HttpPost]
+        public ActionResult CambiarEstado(int id, bool habilitado)
         {
             try
             {
                 SocioNegocio negocio = new SocioNegocio();
-                negocio.eliminar(id);
+                negocio.cambiarEstado(id, habilitado);
 
-                TempData["Exito"] = "Socio eliminado correctamente.";
+                TempData["Exito"] = habilitado
+                    ? "Socio habilitado correctamente."
+                    : "Socio deshabilitado correctamente. No podrá retirar nuevos préstamos.";
+
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
