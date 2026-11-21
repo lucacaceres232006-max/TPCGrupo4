@@ -137,24 +137,14 @@
                                 <td class="text-end">
                                     @if (prestamo.Estado == "Activo")
                                     {
-                                        <form method="post" action="@Url.Action("Devolver", "Prestamos")">
-                                            @Html.AntiForgeryToken()
-
-                                            <input type="hidden" name="id" value="@prestamo.Id" />
-
-                                            <label for="obs_@prestamo.Id" class="visually-hidden">Observaciones de devolución para el préstamo @prestamo.NumeroComprobante</label>
-                                            <input type="text"
-                                                   id="obs_@prestamo.Id"
-                                                   name="observaciones"
-                                                   class="form-control form-control-sm mb-2"
-                                                   placeholder="Observaciones (opcional)" />
-
-                                            <button type="submit"
-                                                    class="btn btn-warning btn-sm"
-                                                    aria-label="Registrar devolución del préstamo @prestamo.NumeroComprobante de @prestamo.Socio.Apellido, @prestamo.Socio.Nombre">
-                                                Registrar devolución
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                class="btn btn-warning btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalDevolucion"
+                                                aria-label="Registrar devolución del préstamo @prestamo.NumeroComprobante de @prestamo.Socio.Apellido, @prestamo.Socio.Nombre"
+                                                onclick="prepararDevolucion(@prestamo.Id, '@prestamo.NumeroComprobante', '@prestamo.Ejemplar.CodigoInventario - @prestamo.Ejemplar.TituloLibro', '@prestamo.Socio.Apellido, @prestamo.Socio.Nombre')">
+                                            Registrar devolución
+                                        </button>
                                     }
                                     else
                                     {
@@ -176,4 +166,53 @@
             </table>
         </div>
     </div>
+    <div class="modal fade" id="modalDevolucion" tabindex="-1" aria-labelledby="tituloModalDevolucion" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                @using (Html.BeginForm("Devolver", "Prestamos", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-header">
+                        <h2 class="modal-title h5" id="tituloModalDevolucion">Registrar devolución</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" id="idPrestamoDevolucion" name="id" />
+                        <p id="detallePrestamoDevolucion" class="fw-semibold mb-3"></p>
+
+                        <div class="mb-3">
+                            <label for="estadoEjemplar" class="form-label fw-semibold">Estado en el que regresa el ejemplar *</label>
+                            <select id="estadoEjemplar" name="estadoEjemplar" class="form-select" required aria-required="true">
+                                <option value="Disponible">Disponible (En buen estado)</option>
+                                <option value="En reparación">En reparación</option>
+                                <option value="Extraviado">Extraviado</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observacionesDevolucion" class="form-label fw-semibold">Observaciones (opcional)</label>
+                            <textarea id="observacionesDevolucion" name="observaciones" class="form-control" rows="3" placeholder="Detalle si el ejemplar presenta algún daño o novedad..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Confirmar devolución</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function prepararDevolucion(id, comprobante, ejemplar, socio) {
+            document.getElementById("idPrestamoDevolucion").value = id;
+            document.getElementById("detallePrestamoDevolucion").textContent =
+                "Comprobante " + comprobante + " — " + ejemplar + " (" + socio + ")";
+            document.getElementById("estadoEjemplar").value = "Disponible";
+            document.getElementById("observacionesDevolucion").value = "";
+        }
+    </script>
 </main>

@@ -101,7 +101,6 @@ namespace Negocio
             {
                 datos.iniciarTransaccion();
 
-                // 1. Obtener los días de duración de la política
                 datos.setearConsulta(@"
             SELECT ISNULL(
                 (SELECT PP.DiasDuracion
@@ -118,7 +117,6 @@ namespace Negocio
                 if (diasDuracion <= 0)
                     throw new Exception("El socio no está habilitado o no tiene una política válida.");
 
-                // 2. Obtener la cantidad máxima de ejemplares
                 datos.setearConsulta(@"
             SELECT ISNULL(
                 (SELECT PP.CantidadMaximaEjemplares
@@ -132,7 +130,6 @@ namespace Negocio
 
                 int cantidadMaxima = datos.ejecutarAccionScalar();
 
-                // 3. Contar los préstamos activos del socio
                 datos.setearConsulta(@"
             SELECT COUNT(*)
             FROM PRESTAMOS WITH (UPDLOCK, HOLDLOCK)
@@ -146,7 +143,6 @@ namespace Negocio
                 if (prestamosActivos >= cantidadMaxima)
                     throw new Exception("El socio alcanzó el límite máximo de préstamos.");
 
-                // 4. Generar el siguiente número de comprobante
                 datos.setearConsulta(@"
             SELECT ISNULL(
                 MAX(TRY_CONVERT(BIGINT, SUBSTRING(NumeroComprobante, 6, 45))),
@@ -159,7 +155,6 @@ namespace Negocio
 
                 string comprobante = "COMP-" + siguienteNumero.ToString("D4");
 
-                // 5. Cambiar el estado del ejemplar
                 datos.setearConsulta(@"
             UPDATE EJEMPLARES
             SET Estado = 'Prestado'
@@ -175,7 +170,6 @@ namespace Negocio
                 if (ejemplarActualizado != 1)
                     throw new Exception("El ejemplar no existe o no está disponible.");
 
-                // 6. Registrar el préstamo
                 datos.setearConsulta(@"
             INSERT INTO PRESTAMOS
             (
@@ -205,10 +199,8 @@ namespace Negocio
 
                 int idGenerado = datos.ejecutarAccionScalar();
 
-                // 7. Confirmar la transacción
                 datos.confirmarTransaccion();
 
-                // Actualizar el objeto recibido
                 nuevo.Id = idGenerado;
                 nuevo.NumeroComprobante = comprobante;
                 nuevo.Estado = "Activo";
@@ -226,10 +218,14 @@ namespace Negocio
             }
         }
 
-        public void devolver(int idPrestamo, string observaciones)
+        public void devolver(int idPrestamo, string estadoEjemplar, string observaciones)
         {
             if (idPrestamo <= 0)
                 throw new Exception("El préstamo seleccionado no es válido.");
+
+            string estadoFinal = string.IsNullOrWhiteSpace(estadoEjemplar)
+                ? "Disponible"
+                : estadoEjemplar.Trim();
 
             AccesoDatos datos = new AccesoDatos();
 
@@ -237,13 +233,12 @@ namespace Negocio
             {
                 datos.iniciarTransaccion();
 
-                // 1. Obtener el ejemplar del préstamo activo.
                 datos.setearConsulta(@"
-            SELECT ISNULL(
-                (SELECT IdEjemplar
-                 FROM PRESTAMOS WITH (UPDLOCK, HOLDLOCK)
-                 WHERE Id = @IdPrestamo
-                 AND Estado = 'Activo'), 0)");
+                    SELECT ISNULL(
+                        (SELECT IdEjemplar
+                         FROM PRESTAMOS WITH (UPDLOCK, HOLDLOCK)
+                         WHERE Id = @IdPrestamo
+                         AND Estado = 'Activo'), 0)");
 
                 datos.setearParametro("@IdPrestamo", idPrestamo);
 
@@ -252,34 +247,38 @@ namespace Negocio
                 if (idEjemplar <= 0)
                     throw new Exception("El préstamo no existe o ya fue devuelto.");
 
-                // 2. Registrar la devolución del préstamo.
                 datos.setearConsulta(@"
-            UPDATE PRESTAMOS
-            SET Estado = 'Devuelto',
-                FechaDevolucionReal = GETDATE(),
-                ObservacionesDevolucion = @Observaciones
-            WHERE Id = @IdPrestamo
-            AND Estado = 'Activo';
+                    UPDATE PRESTAMOS
+                    SET Estado = 'Devuelto',
+                        FechaDevolucionReal = GETDATE(),
+                        ObservacionesDevolucion = @Observaciones
+                    WHERE Id = @IdPrestamo
+                    AND Estado = 'Activo';
 
-            SELECT @@ROWCOUNT;");
+                    SELECT @@ROWCOUNT;");
 
                 datos.setearParametro("@IdPrestamo", idPrestamo);
-                datos.setearParametro("@Observaciones", observaciones);
+                datos.setearParametro("@Observaciones", string.IsNullOrWhiteSpace(observaciones) ? (object)DBNull.Value : observaciones.Trim());
 
                 int prestamosActualizados = datos.ejecutarAccionScalar();
 
                 if (prestamosActualizados != 1)
                     throw new Exception("No se pudo registrar la devolución.");
 
-                // 3. Volver a dejar disponible el ejemplar.
                 datos.setearConsulta(@"
-            UPDATE EJEMPLARES
-            SET Estado = 'Disponible'
-            WHERE Id = @IdEjemplar
-            AND Estado = 'Prestado';
+                    UPDATE EJEMPLARES
+                    SET Estado = @EstadoEjemplar,
+                        Observaciones = CASE
+                            WHEN @Observaciones IS NOT NULL THEN @Observaciones
+                            ELSE Observaciones
+                        END
+                    WHERE Id = @IdEjemplar
+                    AND Estado = 'Prestado';
 
-            SELECT @@ROWCOUNT;");
+                    SELECT @@ROWCOUNT;");
 
+                datos.setearParametro("@EstadoEjemplar", estadoFinal);
+                datos.setearParametro("@Observaciones", string.IsNullOrWhiteSpace(observaciones) ? (object)DBNull.Value : observaciones.Trim());
                 datos.setearParametro("@IdEjemplar", idEjemplar);
 
                 int ejemplaresActualizados = datos.ejecutarAccionScalar();
@@ -287,7 +286,6 @@ namespace Negocio
                 if (ejemplaresActualizados != 1)
                     throw new Exception("No se pudo actualizar el estado del ejemplar.");
 
-                // 4. Confirmar ambas modificaciones.
                 datos.confirmarTransaccion();
             }
             catch
@@ -300,7 +298,6 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
 
 
     }

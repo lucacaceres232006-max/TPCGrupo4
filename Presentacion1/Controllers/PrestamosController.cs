@@ -103,14 +103,15 @@ namespace Presentacion1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Devolver(int id, string observaciones)
+        public ActionResult Devolver(int id, string estadoEjemplar, string observaciones)
         {
             try
             {
                 PrestamoNegocio negocio = new PrestamoNegocio();
-                negocio.devolver(id, observaciones);
+                negocio.devolver(id, estadoEjemplar, observaciones);
 
-                TempData["Exito"] = "La devolución se registró correctamente.";
+                string estadoTexto = string.IsNullOrWhiteSpace(estadoEjemplar) ? "Disponible" : estadoEjemplar;
+                TempData["Exito"] = "La devolución se registró correctamente. El ejemplar quedó en estado: " + estadoTexto + ".";
             }
             catch (Exception ex)
             {
