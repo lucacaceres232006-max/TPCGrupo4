@@ -386,17 +386,13 @@ namespace Negocio
             }
         }
 
-
-
-
-
         public void finalizarVencido(
-                    int idPrestamo,
-                    string estadoEjemplar,
-                    string accionSocio,
-                    int? idNuevaPolitica,
-                    int diasDescuento,
-                    string observaciones)
+            int idPrestamo,
+            string estadoEjemplar,
+            string accionSocio,
+            int? idNuevaPolitica,
+            int diasDescuento,
+            string observaciones)
         {
             if (idPrestamo <= 0)
                 throw new Exception("El préstamo seleccionado no es válido.");
@@ -452,7 +448,7 @@ namespace Negocio
 
                 datos.setearConsulta(@"
                     UPDATE PRESTAMOS
-                    SET Estado = 'Devuelto',
+                    SET Estado = 'Finalizado',
                         FechaDevolucionReal = GETDATE(),
                         ObservacionesDevolucion = @Observaciones
                     WHERE Id = @IdPrestamo
@@ -526,6 +522,5 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
     }
 }

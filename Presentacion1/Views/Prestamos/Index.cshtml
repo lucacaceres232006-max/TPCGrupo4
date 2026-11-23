@@ -3,6 +3,7 @@
 
 @{
     ViewBag.Title = "Préstamos y devoluciones";
+    var politicas = ViewBag.Politicas as IEnumerable<Dominio.PoliticaPrestamo>;
 }
 
 <main class="container py-4" aria-labelledby="titulo-prestamos">
@@ -56,6 +57,7 @@
                             <option value="Activo" @(ViewBag.Estado == "Activo" ? "selected" : "")>Activo</option>
                             <option value="Vencido" @(ViewBag.Estado == "Vencido" ? "selected" : "")>Vencido</option>
                             <option value="Devuelto" @(ViewBag.Estado == "Devuelto" ? "selected" : "")>Devuelto</option>
+                            <option value="Finalizado" @(ViewBag.Estado == "Finalizado" ? "selected" : "")>Finalizado</option>
                         </select>
                     </div>
 
@@ -125,6 +127,10 @@
                                     {
                                         <span class="badge bg-secondary">Devuelto</span>
                                     }
+                                    else if (prestamo.Estado == "Finalizado")
+                                    {
+                                        <span class="badge bg-dark">Finalizado</span>
+                                    }
                                     else if (vencido)
                                     {
                                         <span class="badge bg-danger">Vencido</span>
@@ -135,17 +141,13 @@
                                     }
                                 </td>
 
-
                                 <td class="text-end">
                                     @if (prestamo.Estado == "Activo")
                                     {
-                                        <div class="d-flex justify-content-end gap-2">
-
-                                            @if (prestamo.CantidadRenovaciones <
-                                                 prestamo.Socio.PoliticaPrestamo.LimiteRenovaciones)
+                                        <div class="d-flex justify-content-end flex-wrap gap-2">
+                                            @if (!vencido && prestamo.CantidadRenovaciones < prestamo.Socio.PoliticaPrestamo.LimiteRenovaciones)
                                             {
-                                                using (Html.BeginForm("Extender", "Prestamos",
-                                                    FormMethod.Post, new { @class = "d-inline" }))
+                                                using (Html.BeginForm("Extender", "Prestamos", FormMethod.Post, new { @class = "d-inline" }))
                                                 {
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="id" value="@prestamo.Id" />
@@ -158,15 +160,28 @@
                                                 }
                                             }
 
-                                            <button type="button"
-                                                    class="btn btn-warning btn-sm text-nowrap"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalDevolucion"
-                                                    aria-label="Registrar devolución del préstamo @prestamo.NumeroComprobante"
-                                                    onclick="prepararDevolucion(@prestamo.Id, '@prestamo.NumeroComprobante', '@prestamo.Ejemplar.CodigoInventario - @prestamo.Ejemplar.TituloLibro', '@prestamo.Socio.Apellido, @prestamo.Socio.Nombre')">
-                                                Registrar devolución
-                                            </button>
-
+                                            @if (vencido)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-danger btn-sm text-nowrap"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalFinalizarVencido"
+                                                        aria-label="Finalizar préstamo vencido @prestamo.NumeroComprobante de @prestamo.Socio.Apellido, @prestamo.Socio.Nombre"
+                                                        onclick="prepararFinalizarVencido(@prestamo.Id, '@prestamo.NumeroComprobante', '@prestamo.Ejemplar.CodigoInventario - @prestamo.Ejemplar.TituloLibro', '@prestamo.Socio.Apellido, @prestamo.Socio.Nombre', @(prestamo.Socio.PoliticaPrestamo != null ? prestamo.Socio.PoliticaPrestamo.Id : 0))">
+                                                    Finalizar préstamo
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-warning btn-sm text-nowrap"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalDevolucion"
+                                                        aria-label="Registrar devolución del préstamo @prestamo.NumeroComprobante"
+                                                        onclick="prepararDevolucion(@prestamo.Id, '@prestamo.NumeroComprobante', '@prestamo.Ejemplar.CodigoInventario - @prestamo.Ejemplar.TituloLibro', '@prestamo.Socio.Apellido, @prestamo.Socio.Nombre')">
+                                                    Registrar devolución
+                                                </button>
+                                            }
                                         </div>
                                     }
                                     else
@@ -174,7 +189,6 @@
                                         <span class="text-muted">Sin acciones</span>
                                     }
                                 </td>
-
                             </tr>
                         }
                     }
@@ -190,6 +204,7 @@
             </table>
         </div>
     </div>
+
     <div class="modal fade" id="modalDevolucion" tabindex="-1" aria-labelledby="tituloModalDevolucion" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -230,6 +245,74 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalFinalizarVencido" tabindex="-1" aria-labelledby="tituloModalFinalizarVencido" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                @using (Html.BeginForm("FinalizarVencido", "Prestamos", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-header">
+                        <h2 class="modal-title h5" id="tituloModalFinalizarVencido">Finalizar préstamo vencido y aplicar sanción</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" id="idPrestamoVencido" name="id" />
+                        <p id="detallePrestamoVencido" class="fw-semibold mb-3"></p>
+
+                        <div class="mb-3">
+                            <label for="estadoEjemplarVencido" class="form-label fw-semibold">Estado final del ejemplar *</label>
+                            <select id="estadoEjemplarVencido" name="estadoEjemplar" class="form-select" required aria-required="true">
+                                <option value="Extraviado">Extraviado</option>
+                                <option value="En reparación">En reparación</option>
+                                <option value="Disponible">Disponible</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="accionSocioVencido" class="form-label fw-semibold">Acción o sanción sobre el socio *</label>
+                            <select id="accionSocioVencido" name="accionSocio" class="form-select" required aria-required="true" onchange="toggleCamposSancion()">
+                                <option value="Ninguna">Sin sanción adicional</option>
+                                <option value="Suspender">Suspender socio (deshabilitar)</option>
+                                <option value="CambiarPolitica">Cambiar política de préstamo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="contenedorNuevaPolitica">
+                            <label for="idNuevaPolitica" class="form-label fw-semibold">Nueva política de préstamo</label>
+                            <select id="idNuevaPolitica" name="idNuevaPolitica" class="form-select">
+                                <option value="">Seleccionar política</option>
+                                @if (politicas != null)
+                                {
+                                    foreach (var pol in politicas)
+                                    {
+                                        <option value="@pol.Id">@pol.Descripcion (Máx. @pol.CantidadMaximaEjemplares, @pol.DiasDuracion días)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="diasDescuentoVencido" class="form-label fw-semibold">Descontar días en futuros préstamos (registrado en observaciones)</label>
+                            <input type="number" id="diasDescuentoVencido" name="diasDescuento" class="form-control" min="0" max="365" value="0" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observacionesVencido" class="form-label fw-semibold">Observaciones del cierre o sanción</label>
+                            <textarea id="observacionesVencido" name="observaciones" class="form-control" rows="3" placeholder="Indicá motivos del vencimiento, extravío o sanción aplicada..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar finalización</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
     <script>
         function prepararDevolucion(id, comprobante, ejemplar, socio) {
             document.getElementById("idPrestamoDevolucion").value = id;
@@ -237,6 +320,32 @@
                 "Comprobante " + comprobante + " — " + ejemplar + " (" + socio + ")";
             document.getElementById("estadoEjemplar").value = "Disponible";
             document.getElementById("observacionesDevolucion").value = "";
+        }
+
+        function prepararFinalizarVencido(id, comprobante, ejemplar, socio, idPoliticaActual) {
+            document.getElementById("idPrestamoVencido").value = id;
+            document.getElementById("detallePrestamoVencido").textContent =
+                "Comprobante " + comprobante + " — " + ejemplar + " (" + socio + ")";
+            document.getElementById("estadoEjemplarVencido").value = "Extraviado";
+            document.getElementById("accionSocioVencido").value = "Ninguna";
+            document.getElementById("diasDescuentoVencido").value = "0";
+            document.getElementById("observacionesVencido").value = "";
+
+            const ddlPolitica = document.getElementById("idNuevaPolitica");
+            if (ddlPolitica && idPoliticaActual > 0) {
+                ddlPolitica.value = idPoliticaActual;
+            }
+            toggleCamposSancion();
+        }
+
+        function toggleCamposSancion() {
+            const accion = document.getElementById("accionSocioVencido").value;
+            const contenedorPolitica = document.getElementById("contenedorNuevaPolitica");
+            if (accion === "CambiarPolitica") {
+                contenedorPolitica.classList.remove("d-none");
+            } else {
+                contenedorPolitica.classList.add("d-none");
+            }
         }
     </script>
 </main>

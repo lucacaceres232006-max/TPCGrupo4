@@ -11,6 +11,7 @@ namespace Presentacion1.Controllers
         public ActionResult Index(string buscar, string estado)
         {
             PrestamoNegocio negocio = new PrestamoNegocio();
+            PoliticaPrestamoNegocio politicaNegocio = new PoliticaPrestamoNegocio();
 
             var prestamos = negocio.listar();
 
@@ -53,6 +54,7 @@ namespace Presentacion1.Controllers
 
             ViewBag.Buscar = buscar;
             ViewBag.Estado = estado;
+            ViewBag.Politicas = politicaNegocio.listar();
 
             return View(prestamos);
         }
@@ -120,6 +122,51 @@ namespace Presentacion1.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult FinalizarVencido(
+            int id,
+            string estadoEjemplar,
+            string accionSocio,
+            int? idNuevaPolitica,
+            int diasDescuento,
+            string observaciones)
+        {
+            try
+            {
+                PrestamoNegocio negocio = new PrestamoNegocio();
+                negocio.finalizarVencido(id, estadoEjemplar, accionSocio, idNuevaPolitica, diasDescuento, observaciones);
+
+                TempData["Exito"] = "Préstamo vencido finalizado correctamente. Ejemplar en estado: " + estadoEjemplar + ".";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Extender(int id)
+        {
+            try
+            {
+                PrestamoNegocio negocio = new PrestamoNegocio();
+                negocio.extender(id);
+
+                TempData["Exito"] = "El préstamo se extendió correctamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
         private void cargarDatos()
         {
             SocioNegocio socioNegocio = new SocioNegocio();
@@ -152,25 +199,5 @@ namespace Presentacion1.Controllers
                 .Where(e => e.Estado == "Disponible")
                 .ToList();
         }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Extender(int id)
-        {
-            try
-            {
-                PrestamoNegocio negocio = new PrestamoNegocio();
-                negocio.extender(id);
-
-                TempData["Exito"] = "El préstamo se extendió correctamente.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
-            return RedirectToAction("Index");
-        }
-
     }
 }
