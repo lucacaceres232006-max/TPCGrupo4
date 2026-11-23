@@ -117,6 +117,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AutorController.cs" />
     <Compile Include="Controllers\CategoriaController.cs" />
     <Compile Include="Controllers\EditorialController.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Controllers\PrestamosController.cs" />
     <Compile Include="Controllers\SociosController.cs" />
     <Compile Include="Controllers\UsuariosController.cs" />
+    <Compile Include="Filters\AutorizacionAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -200,6 +202,7 @@
     <Content Include="Views\Usuarios\Create.cshtml" />
     <Content Include="Views\Usuarios\Edit.cshtml" />
     <Content Include="Views\Prestamos\Create.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
     <None Include="Views\_ViewStart.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

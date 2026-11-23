@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using Dominio;
 using Negocio;
+using Presentacion1.Filters;
 
 namespace Presentacion1.Controllers
-{
+{    
     public class LibrosController : Controller
     {
         // GET: Libros
+        [Autorizacion("Usuario", "Bibliotecario", "Administrador")]
         public ActionResult Index(string buscar)
         {
             LibroNegocio negocio = new LibroNegocio();
@@ -26,6 +28,7 @@ namespace Presentacion1.Controllers
         }
 
         // GET: Libros/Create
+        [Autorizacion("Usuario", "Bibliotecario", "Administrador")]
         public ActionResult Create()
         {
             cargarListasDesplegables();
@@ -34,6 +37,7 @@ namespace Presentacion1.Controllers
 
         // POST: Libros/Create
         [HttpPost]
+        [Autorizacion("Usuario", "Bibliotecario", "Administrador")]
         public ActionResult Create(
             string Titulo,
             string ISBN,
@@ -90,6 +94,7 @@ namespace Presentacion1.Controllers
         }
 
         // GET: Libros/Edit/5
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Edit(int id)
         {
             LibroNegocio negocio = new LibroNegocio();
@@ -106,6 +111,7 @@ namespace Presentacion1.Controllers
 
         // POST: Libros/Edit/5
         [HttpPost]
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Edit(
             int Id,
             string Titulo,
@@ -164,6 +170,7 @@ namespace Presentacion1.Controllers
         }
 
         // GET: Libros/Delete/5
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Delete(int id)
         {
             try
@@ -181,6 +188,7 @@ namespace Presentacion1.Controllers
         }
 
         // GET: Libros/Details/5
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Details(int id)
         {
             LibroNegocio negocio = new LibroNegocio();
