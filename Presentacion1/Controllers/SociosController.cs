@@ -1,14 +1,17 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Dominio;
 using Negocio;
+using Presentacion1.Filters;
 
 namespace Presentacion.Controllers
 {
     public class SociosController : Controller
     {
+        [Autorizacion("Usuario", "Bibliotecario", "Administrador")]
         public ActionResult Index(string buscar)
         {
             SocioNegocio negocio = new SocioNegocio();
@@ -28,6 +31,7 @@ namespace Presentacion.Controllers
             return View(lista);
         }
 
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Create()
         {
             cargarPoliticas();
@@ -36,6 +40,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Create(Socio nuevo, int idPolitica)
         {
             try
@@ -59,6 +64,7 @@ namespace Presentacion.Controllers
             }
         }
 
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Edit(int id)
         {
             SocioNegocio negocio = new SocioNegocio();
@@ -72,6 +78,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Edit(Socio socio, int idPolitica)
         {
             try
@@ -96,6 +103,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult CambiarEstado(int id, bool habilitado)
         {
             try
