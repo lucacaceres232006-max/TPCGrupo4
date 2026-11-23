@@ -390,5 +390,142 @@ namespace Negocio
 
 
 
+        public void finalizarVencido(
+                    int idPrestamo,
+                    string estadoEjemplar,
+                    string accionSocio,
+                    int? idNuevaPolitica,
+                    int diasDescuento,
+                    string observaciones)
+        {
+            if (idPrestamo <= 0)
+                throw new Exception("El préstamo seleccionado no es válido.");
+
+            string estadoFinalEjemplar = string.IsNullOrWhiteSpace(estadoEjemplar)
+                ? "Extraviado"
+                : estadoEjemplar.Trim();
+
+            if (diasDescuento < 0)
+                diasDescuento = 0;
+
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.iniciarTransaccion();
+
+                datos.setearConsulta(@"
+                    SELECT IdEjemplar, IdSocio, FechaPrevistaDevolucion
+                    FROM PRESTAMOS WITH (UPDLOCK, HOLDLOCK)
+                    WHERE Id = @IdPrestamo
+                      AND Estado = 'Activo'");
+
+                datos.setearParametro("@IdPrestamo", idPrestamo);
+                datos.ejecutarLectura();
+
+                int idEjemplar = 0;
+                int idSocio = 0;
+                DateTime fechaPrevista = DateTime.MinValue;
+
+                if (datos.Lector.Read())
+                {
+                    idEjemplar = Convert.ToInt32(datos.Lector["IdEjemplar"]);
+                    idSocio = Convert.ToInt32(datos.Lector["IdSocio"]);
+                    fechaPrevista = Convert.ToDateTime(datos.Lector["FechaPrevistaDevolucion"]);
+                }
+                else
+                {
+                    throw new Exception("El préstamo no existe o ya no se encuentra activo.");
+                }
+
+                datos.Lector.Close();
+
+                if (fechaPrevista.Date >= DateTime.Today)
+                    throw new Exception("El préstamo no está vencido. Utilizá la opción de devolución habitual.");
+
+                string obsFinal = observaciones ?? "";
+                if (diasDescuento > 0)
+                {
+                    string notaDescuento = $"[Sanción por vencimiento: -{diasDescuento} días en futuros préstamos]";
+                    obsFinal = string.IsNullOrWhiteSpace(obsFinal) ? notaDescuento : obsFinal.Trim() + " " + notaDescuento;
+                }
+
+                datos.setearConsulta(@"
+                    UPDATE PRESTAMOS
+                    SET Estado = 'Devuelto',
+                        FechaDevolucionReal = GETDATE(),
+                        ObservacionesDevolucion = @Observaciones
+                    WHERE Id = @IdPrestamo
+                      AND Estado = 'Activo';
+
+                    SELECT @@ROWCOUNT;");
+
+                datos.setearParametro("@IdPrestamo", idPrestamo);
+                datos.setearParametro("@Observaciones", string.IsNullOrWhiteSpace(obsFinal) ? (object)DBNull.Value : obsFinal.Trim());
+
+                int prestamosActualizados = datos.ejecutarAccionScalar();
+
+                if (prestamosActualizados != 1)
+                    throw new Exception("No se pudo finalizar el préstamo vencido.");
+
+                datos.setearConsulta(@"
+                    UPDATE EJEMPLARES
+                    SET Estado = @EstadoEjemplar,
+                        Observaciones = CASE
+                            WHEN @Observaciones IS NOT NULL THEN @Observaciones
+                            ELSE Observaciones
+                        END
+                    WHERE Id = @IdEjemplar
+                      AND Estado = 'Prestado';
+
+                    SELECT @@ROWCOUNT;");
+
+                datos.setearParametro("@EstadoEjemplar", estadoFinalEjemplar);
+                datos.setearParametro("@Observaciones", string.IsNullOrWhiteSpace(obsFinal) ? (object)DBNull.Value : obsFinal.Trim());
+                datos.setearParametro("@IdEjemplar", idEjemplar);
+
+                int ejemplaresActualizados = datos.ejecutarAccionScalar();
+
+                if (ejemplaresActualizados != 1)
+                    throw new Exception("No se pudo actualizar el estado del ejemplar.");
+
+                if (accionSocio == "Suspender")
+                {
+                    datos.setearConsulta(@"
+                        UPDATE SOCIOS
+                        SET Habilitado = 0
+                        WHERE Id = @IdSocio;");
+
+                    datos.setearParametro("@IdSocio", idSocio);
+                    datos.ejecutarAccion();
+                }
+                else if (accionSocio == "CambiarPolitica")
+                {
+                    if (!idNuevaPolitica.HasValue || idNuevaPolitica.Value <= 0)
+                        throw new Exception("Debés seleccionar una política de préstamo para aplicar al socio.");
+
+                    datos.setearConsulta(@"
+                        UPDATE SOCIOS
+                        SET IdPoliticaPrestamo = @IdPolitica
+                        WHERE Id = @IdSocio;");
+
+                    datos.setearParametro("@IdPolitica", idNuevaPolitica.Value);
+                    datos.setearParametro("@IdSocio", idSocio);
+                    datos.ejecutarAccion();
+                }
+
+                datos.confirmarTransaccion();
+            }
+            catch
+            {
+                datos.cancelarTransaccion();
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
     }
 }
