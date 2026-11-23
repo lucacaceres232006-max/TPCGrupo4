@@ -3,9 +3,11 @@ using System;
 using System.Web.Mvc;
 using Dominio;
 using Negocio;
+using Presentacion1.Filters;
 
 namespace Presentacion1.Controllers
 {
+    [Autorizacion("Administrador")]
     public class UsuariosController : Controller
     {
         private UsuarioNegocio negocio = new UsuarioNegocio();
