@@ -119,21 +119,6 @@ namespace Presentacion1.Controllers
             }
         }
 
-        public ActionResult Delete(int id)
-        {
-            try
-            {
-                EjemplarNegocio negocio = new EjemplarNegocio();
-                negocio.eliminar(id);
-                TempData["Exito"] = "Ejemplar eliminado correctamente.";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-                return RedirectToAction("Index");
-            }
-        }
 
         private void cargarLibros()
         {
