@@ -1,5 +1,6 @@
 ﻿@{
     ViewBag.Title = "Inicio";
+    string perfil = Session["Perfil"] as string;
 }
 
 <main class="container py-4" aria-labelledby="titulo-inicio">
@@ -11,65 +12,97 @@
     </div>
 
     <div class="row g-3">
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body d-flex flex-column">
-                    <h2 class="card-title h5">Préstamos y devoluciones</h2>
-                    <p class="card-text text-muted flex-grow-1">
-                        Registrá retiros, controlá vencimientos y gestioná devoluciones.
-                    </p>
-                    <a href="@Url.Action("Index", "Prestamos")" class="btn btn-primary">
-                        Ir a Préstamos
-                    </a>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body d-flex flex-column">
-                    <h2 class="card-title h5">Socios y políticas</h2>
-                    <p class="card-text text-muted flex-grow-1">
-                        Administrá el padrón de socios y las reglas de préstamo.
-                    </p>
-                    <div class="d-flex gap-2">
-                        <a href="@Url.Action("Index", "Socios")" class="btn btn-outline-primary">
-                            Socios
-                        </a>
-                        <a href="@Url.Action("Index", "PoliticaPrestamo")" class="btn btn-outline-secondary">
-                            Políticas
+        @* PRÉSTAMOS: Administrador y Bibliotecario *@
+        @if (perfil == "Administrador" || perfil == "Bibliotecario")
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="card-title h5">Préstamos y devoluciones</h2>
+                        <p class="card-text text-muted flex-grow-1">
+                            Registrá retiros, controlá vencimientos y gestioná devoluciones.
+                        </p>
+                        <a href="@Url.Action("Index", "Prestamos")" class="btn btn-primary">
+                            Ir a Préstamos
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
+        }
 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body d-flex flex-column">
-                    <h2 class="card-title h5">Catálogo e inventario</h2>
-                    <p class="card-text text-muted flex-grow-1">
-                        Gestioná libros, ejemplares, autores, géneros y editoriales.
-                    </p>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="@Url.Action("Index", "Libros")" class="btn btn-outline-primary btn-sm">
-                            Libros
-                        </a>
-                        <a href="@Url.Action("Index", "Ejemplares")" class="btn btn-outline-primary btn-sm">
-                            Ejemplares
-                        </a>
-                        <a href="@Url.Action("Index", "Autor")" class="btn btn-outline-secondary btn-sm">
-                            Autores
-                        </a>
-                        <a href="@Url.Action("Index", "Categoria")" class="btn btn-outline-secondary btn-sm">
-                            Géneros
-                        </a>
-                        <a href="@Url.Action("Index", "Editorial")" class="btn btn-outline-secondary btn-sm">
-                            Editoriales
+        @* SOCIOS: Administrador y Bibliotecario *@
+        @if (perfil == "Administrador" || perfil == "Bibliotecario")
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="card-title h5">Socios y políticas</h2>
+                        <p class="card-text text-muted flex-grow-1">
+                            Administrá el padrón de socios y las reglas de préstamo.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a href="@Url.Action("Index", "Socios")" class="btn btn-outline-primary">
+                                Socios
+                            </a>
+
+                            @if (perfil == "Administrador")
+                            {
+                                <a href="@Url.Action("Index", "PoliticaPrestamo")" class="btn btn-outline-secondary">
+                                    Políticas
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @* CATÁLOGO: solamente Administrador *@
+        @if (perfil == "Administrador")
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="card-title h5">Catálogo e inventario</h2>
+                        <p class="card-text text-muted flex-grow-1">
+                            Gestioná libros, ejemplares, autores, géneros y editoriales.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="@Url.Action("Index", "Libros")" class="btn btn-outline-primary btn-sm">
+                                Libros
+                            </a>
+                            <a href="@Url.Action("Index", "Ejemplares")" class="btn btn-outline-primary btn-sm">
+                                Ejemplares
+                            </a>
+                            <a href="@Url.Action("Index", "Autor")" class="btn btn-outline-secondary btn-sm">
+                                Autores
+                            </a>
+                            <a href="@Url.Action("Index", "Categoria")" class="btn btn-outline-secondary btn-sm">
+                                Géneros
+                            </a>
+                            <a href="@Url.Action("Index", "Editorial")" class="btn btn-outline-secondary btn-sm">
+                                Editoriales
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="card-title h5">Usuarios</h2>
+                        <p class="card-text text-muted flex-grow-1">
+                            Administrá las cuentas y los perfiles de acceso al sistema.
+                        </p>
+                        <a href="@Url.Action("Index", "Usuarios")" class="btn btn-outline-secondary">
+                            Ir a Usuarios
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
+        }
+
     </div>
 </main>
