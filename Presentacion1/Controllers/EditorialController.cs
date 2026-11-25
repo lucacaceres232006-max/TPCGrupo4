@@ -1,12 +1,13 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using Dominio;
 using Negocio;
+using Presentacion1.Filters;
 
 namespace Presentacion1.Controllers
 {
+    [Autorizacion("Administrador")]
     public class EditorialController : Controller
     {
         public ActionResult Index()

@@ -5,9 +5,11 @@ using System.Web;
 using System.Web.Mvc;
 using Dominio;
 using Negocio;
+using Presentacion1.Filters;
 
 namespace Presentacion.Controllers
 {
+    [Autorizacion("Administrador")]
     public class AutorController : Controller
     {
         // GET: Autor

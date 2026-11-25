@@ -5,9 +5,11 @@ using System.Web;
 using System.Web.Mvc;
 using Dominio;
 using Negocio;
+using Presentacion1.Filters;
 
 namespace Presentacion.Controllers
 {
+    [Autorizacion("Administrador")]
     public class CategoriaController : Controller
     {
         // GET: Categoria
@@ -98,7 +100,5 @@ namespace Presentacion.Controllers
 
             return RedirectToAction("Index");
         }
-
-
     }
 }

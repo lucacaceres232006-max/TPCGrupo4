@@ -11,7 +11,7 @@ namespace Presentacion.Controllers
 {
     public class SociosController : Controller
     {
-        [Autorizacion("Usuario", "Bibliotecario", "Administrador")]
+        [Autorizacion("Bibliotecario", "Administrador")]
         public ActionResult Index(string buscar)
         {
             SocioNegocio negocio = new SocioNegocio();
