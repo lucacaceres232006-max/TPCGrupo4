@@ -8,13 +8,14 @@ namespace Presentacion1.Controllers
     public class AccountController : Controller
     {
         private UsuarioNegocio negocio = new UsuarioNegocio();
-
+        [AllowAnonymous]
         public ActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public ActionResult Login(string nombreUsuario, string clave)
         {
             Usuario usuario = negocio.validarUsuario(nombreUsuario, clave);

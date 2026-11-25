@@ -1,5 +1,6 @@
-﻿using System.Web;
+﻿
 using System.Web.Mvc;
+using Presentacion1.Filters;
 
 namespace Presentacion1
 {
@@ -8,6 +9,7 @@ namespace Presentacion1
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            filters.Add(new AutenticacionAttribute());
         }
     }
 }

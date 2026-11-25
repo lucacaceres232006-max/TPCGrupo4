@@ -2,9 +2,31 @@
 using System;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Routing;
 
 namespace Presentacion1.Filters
 {
+    // Autenticación general: exige una sesión iniciada.
+    public class AutenticacionAttribute : AuthorizeAttribute
+    {
+        protected override bool AuthorizeCore(HttpContextBase httpContext)
+        {
+            return httpContext.Session["Usuario"] != null;
+        }
+
+        protected override void HandleUnauthorizedRequest(
+            AuthorizationContext filterContext)
+        {
+            filterContext.Result = new RedirectToRouteResult(
+                new RouteValueDictionary
+                {
+                    { "controller", "Account" },
+                    { "action", "Login" }
+                });
+        }
+    }
+
+    // Autorización por perfil: conserva los permisos anteriores.
     public class AutorizacionAttribute : AuthorizeAttribute
     {
         private readonly string[] perfilesPermitidos;
@@ -24,7 +46,6 @@ namespace Presentacion1.Filters
             if (string.IsNullOrEmpty(perfil))
                 return false;
 
-            // Si no se especifican perfiles, alcanza con estar autenticado.
             if (perfilesPermitidos == null || perfilesPermitidos.Length == 0)
                 return true;
 
@@ -44,7 +65,7 @@ namespace Presentacion1.Filters
             if (filterContext.HttpContext.Session["Usuario"] == null)
             {
                 filterContext.Result = new RedirectToRouteResult(
-                    new System.Web.Routing.RouteValueDictionary
+                    new RouteValueDictionary
                     {
                         { "controller", "Account" },
                         { "action", "Login" }
