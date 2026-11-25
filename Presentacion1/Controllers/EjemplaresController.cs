@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -11,7 +10,7 @@ namespace Presentacion1.Controllers
 {
     public class EjemplaresController : Controller
     {
-        [Autorizacion("Usuario", "Bibliotecario", "Administrador")]
+        [Autorizacion("Administrador")]
         public ActionResult Index(string buscar, string estado)
         {
             EjemplarNegocio negocio = new EjemplarNegocio();
@@ -42,7 +41,7 @@ namespace Presentacion1.Controllers
             return View(lista);
         }
 
-        [Autorizacion("Bibliotecario", "Administrador")]
+        [Autorizacion("Administrador")]
         public ActionResult Create(int? idLibro)
         {
             cargarLibros();
@@ -55,7 +54,7 @@ namespace Presentacion1.Controllers
         }
 
         [HttpPost]
-        [Autorizacion("Bibliotecario", "Administrador")]
+        [Autorizacion("Administrador")]
         public ActionResult Create(Ejemplar nuevo)
         {
             try
@@ -77,7 +76,7 @@ namespace Presentacion1.Controllers
             }
         }
 
-        [Autorizacion("Bibliotecario", "Administrador")]
+        [Autorizacion("Administrador")]
         public ActionResult Edit(int id)
         {
             EjemplarNegocio negocio = new EjemplarNegocio();
@@ -91,7 +90,7 @@ namespace Presentacion1.Controllers
         }
 
         [HttpPost]
-        [Autorizacion("Bibliotecario", "Administrador")]
+        [Autorizacion("Administrador")]
         public ActionResult Edit(Ejemplar ejemplar)
         {
             try
