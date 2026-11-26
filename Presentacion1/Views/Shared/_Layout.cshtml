@@ -1,6 +1,13 @@
-﻿
+﻿@using Dominio
+@{
+    var usuarioActual = Session["Usuario"] as Usuario;
+    var perfilActual = Session["Perfil"] as string;
+    var controladorActual = ViewContext.RouteData.Values["controller"] != null
+        ? ViewContext.RouteData.Values["controller"].ToString()
+        : "";
+}
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,9 +18,28 @@
 <body>
     <div class="container body-content">
 
-        @if (ViewContext.RouteData.Values["controller"].ToString() != "Home")
+        @if (usuarioActual != null)
         {
-            <div class="mb-3 mt-3">
+            <header class="d-flex flex-wrap justify-content-between align-items-center py-3 mb-3 border-bottom gap-2" aria-label="Información de sesión">
+                <div>
+                    <span class="fw-semibold">Hola, @usuarioActual.Nombre @usuarioActual.Apellido</span>
+                    @if (!string.IsNullOrWhiteSpace(perfilActual))
+                    {
+                        <span class="badge bg-secondary ms-2">@perfilActual</span>
+                    }
+                </div>
+
+                <a href="@Url.Action("Logout", "Account")"
+                   class="btn btn-outline-danger btn-sm"
+                   aria-label="Cerrar sesión de @usuarioActual.Nombre @usuarioActual.Apellido">
+                    Cerrar sesión
+                </a>
+            </header>
+        }
+
+        @if (controladorActual != "Home")
+        {
+            <div class="mb-3">
                 <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
                     ← Volver al inicio
                 </a>
