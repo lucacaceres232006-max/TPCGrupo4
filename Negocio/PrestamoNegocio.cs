@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dominio;
 
 namespace Negocio
@@ -159,7 +156,15 @@ namespace Negocio
             UPDATE EJEMPLARES
             SET Estado = 'Prestado'
             WHERE Id = @IdEjemplar
-            AND Estado = 'Disponible';
+              AND Estado = 'Disponible'
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM LIBROS_AUTORES LA
+                  INNER JOIN AUTORES A ON LA.IdAutor = A.Id
+                  INNER JOIN EJEMPLARES E ON E.IdLibro = LA.IdLibro
+                  WHERE E.Id = @IdEjemplar
+                    AND A.Activo = 0
+              );
 
             SELECT @@ROWCOUNT;");
 
@@ -168,7 +173,7 @@ namespace Negocio
                 int ejemplarActualizado = datos.ejecutarAccionScalar();
 
                 if (ejemplarActualizado != 1)
-                    throw new Exception("El ejemplar no existe o no está disponible.");
+                    throw new Exception("El ejemplar no existe, no está disponible o pertenece a un autor inactivo.");
 
                 datos.setearConsulta(@"
             INSERT INTO PRESTAMOS

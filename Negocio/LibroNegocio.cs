@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dominio;
 
 namespace Negocio
@@ -16,7 +13,17 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("SELECT L.Id, L.Titulo, L.ISBN, L.AnioEdicion, E.Id AS IdEditorial, E.Nombre AS Editorial FROM LIBROS L INNER JOIN EDITORIALES E ON L.IdEditorial = E.Id");
+                datos.setearConsulta(@"
+                    SELECT L.Id, L.Titulo, L.ISBN, L.AnioEdicion, E.Id AS IdEditorial, E.Nombre AS Editorial
+                    FROM LIBROS L
+                    INNER JOIN EDITORIALES E ON L.IdEditorial = E.Id
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM LIBROS_AUTORES LA
+                        INNER JOIN AUTORES A ON LA.IdAutor = A.Id
+                        WHERE LA.IdLibro = L.Id
+                          AND A.Activo = 0
+                    )");
                 datos.ejecutarLectura();
 
                 while (datos.Lector.Read())
@@ -40,9 +47,9 @@ namespace Negocio
 
                 return lista;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -55,7 +62,12 @@ namespace Negocio
             AccesoDatos datos = new AccesoDatos();
             try
             {
-                datos.setearConsulta("SELECT A.Id, A.Nombre, A.Apellido, A.Biografia FROM AUTORES A INNER JOIN LIBROS_AUTORES LA ON A.Id = LA.IdAutor WHERE LA.IdLibro = @idLibro");
+                datos.setearConsulta(@"
+                    SELECT A.Id, A.Nombre, A.Apellido, A.Biografia
+                    FROM AUTORES A
+                    INNER JOIN LIBROS_AUTORES LA ON A.Id = LA.IdAutor
+                    WHERE LA.IdLibro = @idLibro
+                      AND A.Activo = 1");
                 datos.setearParametro("@idLibro", libro.Id);
                 datos.ejecutarLectura();
 
@@ -72,9 +84,9 @@ namespace Negocio
                     libro.Autores.Add(autor);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -100,9 +112,9 @@ namespace Negocio
                     libro.Categorias.Add(categoria);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -133,15 +145,16 @@ namespace Negocio
                     libro.Ejemplares.Add(ejemplar);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
+
         public void agregar(Libro libro)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -238,6 +251,7 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
+
         public void modificar(Libro libro)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -307,18 +321,12 @@ namespace Negocio
 
                 for (int i = 0; i < libro.Autores.Count; i++)
                 {
-                    datos.setearParametro(
-                        "@idAutor" + i,
-                        libro.Autores[i].Id
-                    );
+                    datos.setearParametro("@idAutor" + i, libro.Autores[i].Id);
                 }
 
                 for (int i = 0; i < libro.Categorias.Count; i++)
                 {
-                    datos.setearParametro(
-                        "@idCategoria" + i,
-                        libro.Categorias[i].Id
-                    );
+                    datos.setearParametro("@idCategoria" + i, libro.Categorias[i].Id);
                 }
 
                 datos.ejecutarAccionScalar();
@@ -383,7 +391,5 @@ namespace Negocio
                 datos.cerrarConexion();
             }
         }
-
-
     }
 }

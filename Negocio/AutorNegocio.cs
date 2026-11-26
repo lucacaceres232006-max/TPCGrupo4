@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Dominio;
 
@@ -146,7 +145,19 @@ namespace Negocio
 
             try
             {
-                datos.setearConsulta("UPDATE AUTORES SET Activo = 0 WHERE Id = @id");
+                datos.setearConsulta(@"
+                    IF EXISTS (
+                        SELECT 1
+                        FROM PRESTAMOS P
+                        INNER JOIN EJEMPLARES E ON P.IdEjemplar = E.Id
+                        INNER JOIN LIBROS_AUTORES LA ON E.IdLibro = LA.IdLibro
+                        WHERE LA.IdAutor = @id
+                          AND P.Estado = 'Activo'
+                    )
+                        THROW 50001, 'No se puede desactivar el autor porque tiene libros con préstamos activos.', 1;
+
+                    UPDATE AUTORES SET Activo = 0 WHERE Id = @id;");
+
                 datos.setearParametro("@id", id);
                 datos.ejecutarAccion();
             }

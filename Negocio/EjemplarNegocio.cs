@@ -14,9 +14,16 @@ namespace Negocio
             try
             {
                 datos.setearConsulta(@"
-                    SELECT E.Id, E.IdLibro, L.Titulo AS TituloLibro, E.CodigoInventario, E.Estado, E.Observaciones 
-                    FROM EJEMPLARES E 
+                    SELECT E.Id, E.IdLibro, L.Titulo AS TituloLibro, E.CodigoInventario, E.Estado, E.Observaciones
+                    FROM EJEMPLARES E
                     INNER JOIN LIBROS L ON E.IdLibro = L.Id
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM LIBROS_AUTORES LA
+                        INNER JOIN AUTORES A ON LA.IdAutor = A.Id
+                        WHERE LA.IdLibro = L.Id
+                          AND A.Activo = 0
+                    )
                     ORDER BY L.Titulo, E.CodigoInventario");
                 datos.ejecutarLectura();
 
@@ -53,10 +60,17 @@ namespace Negocio
             try
             {
                 datos.setearConsulta(@"
-                    SELECT E.Id, E.IdLibro, L.Titulo AS TituloLibro, E.CodigoInventario, E.Estado, E.Observaciones 
-                    FROM EJEMPLARES E 
+                    SELECT E.Id, E.IdLibro, L.Titulo AS TituloLibro, E.CodigoInventario, E.Estado, E.Observaciones
+                    FROM EJEMPLARES E
                     INNER JOIN LIBROS L ON E.IdLibro = L.Id
-                    WHERE E.Id = @id");
+                    WHERE E.Id = @id
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM LIBROS_AUTORES LA
+                          INNER JOIN AUTORES A ON LA.IdAutor = A.Id
+                          WHERE LA.IdLibro = L.Id
+                            AND A.Activo = 0
+                      )");
                 datos.setearParametro("@id", id);
                 datos.ejecutarLectura();
 
